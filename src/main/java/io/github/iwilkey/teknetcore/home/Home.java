@@ -24,6 +24,7 @@ public class Home {
 	
 	private final ArrayList<PlayerHomeData> homes = new ArrayList<PlayerHomeData>();
 	
+	// TODO: Make the server remember where homes are.
 	public Home() {
 		// translateRegister();
 	}

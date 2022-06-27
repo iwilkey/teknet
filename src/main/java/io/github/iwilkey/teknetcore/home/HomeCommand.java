@@ -20,7 +20,7 @@ public class HomeCommand implements CommandExecutor {
 		if(!homeCore.hasHome(name)) 
 			player.sendMessage("You do not have a home to return to! Please use '/sethome' to set your home.");
 		else {
-			homeCore.teleportHome(name);
+			homeCore.teleportHome(player, name);
 			player.sendMessage("Welcome home.");
 		}
 		return true;

@@ -1,4 +1,7 @@
 /Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/TeknetCore.java
+/Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/randompos/RandomposCommand.java
+/Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/utils/FileIO.java
 /Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/home/Home.java
 /Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/home/SetHomeCommand.java
 /Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/home/HomeCommand.java
+/Users/ianwilkey/Desktop/teknet-src/plugins/TeknetCore/src/main/java/io/github/iwilkey/teknetcore/utils/Mathematics.java

@@ -8,3 +8,6 @@ commands:
   home:
     description: Teleports you back to the last location you invoked '/sethome' at.
     usage: "Use '/home [no arguments]' to return to the location you last '/sethome' at."
+  randompos:
+    description: Teleport your player to a random location in the main server survival world.
+    usage: "Use '/randompos [no arguments] to teleport to a random location on the map."

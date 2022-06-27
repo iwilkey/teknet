@@ -22,7 +22,7 @@ public class SetHomeCommand implements CommandExecutor {
 		Location location = player.getLocation();
 		String name = player.getName(),
 			worldName = player.getWorld().getName();
-		PlayerHomeData data = new PlayerHomeData(name, worldName, location);
+		PlayerHomeData data = new PlayerHomeData(name, worldName, (float)location.getX(), (float)location.getY(), (float)location.getZ());
 		homeCore.setHome(data);
 		player.sendMessage("You have successfully set your home. Use '/home' to return here.");
 		return true;

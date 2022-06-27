@@ -83,6 +83,7 @@ public class GotoUtils {
 		TeknetCore.informPlayer(player, 
 				"Location successfully deleted.", 
 				LogType.SUCCESS);
+		writeRegister();
 		return true;
 	}
 	
@@ -137,12 +138,14 @@ public class GotoUtils {
 		positions.clear();
 		ArrayList<String[]> data = FileIO.readDataFileLines(DATA_NAME);
 		for(String[] lineDat : data) {
+			if(lineDat.length == 1) continue;
 			ArrayList<Position> ppositions = new ArrayList<Position>();
-			for(int i = 1; i < data.size(); i++) {
+			for(int i = 1; i < lineDat.length; i++) {
 				String[] tokens = lineDat[i].split(";");
-				Location l = new Location(Bukkit.getServer().getWorld(tokens[4]), Integer.parseInt(tokens[1]), 
+				Location l = new Location(Bukkit.getServer().getWorld(tokens[4]), 
+						Integer.parseInt(tokens[1]), 
 						Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
-				Position pos = new Position(tokens[1], l);
+				Position pos = new Position(tokens[0], l);
 				ppositions.add(pos);
 			}
 			PlayerSavedPositions psp = new PlayerSavedPositions(lineDat[0], ppositions);

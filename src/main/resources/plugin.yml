@@ -1,0 +1,10 @@
+name: TeknetCore
+main: io.github.iwilkey.teknetcore.TeknetCore
+version: 1.0.1
+commands:
+  sethome:
+    description: Sets your home as your current location. Use '/home' to return to this position.
+    usage: "Use '/sethome [no arguments]' to set your '/home' as current location."
+  home:
+    description: Teleports you back to the last location you invoked '/sethome' at.
+    usage: "Use '/home [no arguments]' to return to the location you last '/sethome' at."

@@ -1,6 +1,6 @@
 name: TeknetCore
 main: io.github.iwilkey.teknetcore.TeknetCore
-version: 1.0.1
+version: 1.1.1
 commands:
   sethome:
     description: Sets your home as your current location. Use '/home' to return to this position.
@@ -11,3 +11,15 @@ commands:
   randompos:
     description: Teleport your player to a random location in the main server survival world.
     usage: "Use '/randompos [no arguments] to teleport to a random location on the map."
+  savepos:
+    description: Save your current location with a unique name and return to it using '/goto [position-name]'.
+    usage: "Use '/savepos [position-name]' to save your current location. Name must be unique, and no spaces allowed!"
+  listpos:
+    description: See all your current saved positions by name and their coordinates.
+    usage: "Use '/listpos [no arguments] to see all of your current saved positions."
+  delpos:
+    description: Delete a specific position.
+    usage: "Use 'delpos [position-name]' to delete position [name]."
+  goto:
+    description: Teleport to one of your saved positions.
+    usage: "Use '/goto [position-name]' to teleport to one of your saved positions."

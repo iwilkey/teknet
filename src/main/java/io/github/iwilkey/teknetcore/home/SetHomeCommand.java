@@ -6,13 +6,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import io.github.iwilkey.teknetcore.home.Home.PlayerHomeData;
+import io.github.iwilkey.teknetcore.TeknetCore;
+import io.github.iwilkey.teknetcore.home.HomeUtils.PlayerHomeData;
+import io.github.iwilkey.teknetcore.utils.LogType;
 
 public class SetHomeCommand implements CommandExecutor {
 	
-	private final Home homeCore;
+	private final HomeUtils homeCore;
 
-    public SetHomeCommand(Home homeCore) {
+    public SetHomeCommand(HomeUtils homeCore) {
         this.homeCore = homeCore;
     }
 
@@ -24,7 +26,7 @@ public class SetHomeCommand implements CommandExecutor {
 			worldName = player.getWorld().getName();
 		PlayerHomeData data = new PlayerHomeData(name, worldName, (float)location.getX(), (float)location.getY(), (float)location.getZ());
 		homeCore.setHome(data);
-		player.sendMessage("You have successfully set your home. Use '/home' to return here.");
+		TeknetCore.informPlayer(player, "You have successfully set your home. Use '/home' to return here.", LogType.SUCCESS);
 		return true;
 	}
 

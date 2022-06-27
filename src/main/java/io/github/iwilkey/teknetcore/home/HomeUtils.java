@@ -8,7 +8,9 @@ import org.bukkit.entity.Player;
 
 import io.github.iwilkey.teknetcore.utils.FileIO;
 
-public class Home {
+public class HomeUtils {
+	
+	private final String DATA_NAME = "register";
 	
 	public static class PlayerHomeData {
 		public String playerName,
@@ -23,8 +25,7 @@ public class Home {
 	
 	private ArrayList<PlayerHomeData> homes;
 	
-	// TODO: Make the server remember where homes are.
-	public Home() {
+	public HomeUtils() {
 		homes = new ArrayList<PlayerHomeData>();
 		translateRegister();
 	}
@@ -45,7 +46,6 @@ public class Home {
 		 return false;
 	}
 	
-	// The player has a home.
 	public void teleportHome(Player player, String name) {
 		PlayerHomeData data = getPlayerHomeData(name);
 		Location lpp = player.getLocation();
@@ -64,9 +64,9 @@ public class Home {
 	}
 	
 	private void translateRegister() {
-		if(!FileIO.fileExists("register")) FileIO.createDataFile("register");
+		if(!FileIO.fileExists(DATA_NAME)) FileIO.createDataFile(DATA_NAME);
 		homes.clear();
-		ArrayList<String[]> data = FileIO.readDataFileLines("register");
+		ArrayList<String[]> data = FileIO.readDataFileLines(DATA_NAME);
 		for(String[] lineDat : data) {
 			float x = Float.parseFloat(lineDat[2]),
 				y = Float.parseFloat(lineDat[3]),
@@ -77,10 +77,10 @@ public class Home {
 	}
 	
 	public void writeRegister() {
-		FileIO.clearDataFile("register");
+		FileIO.clearDataFile(DATA_NAME);
 		for(PlayerHomeData entry : homes) {
 			String data = entry.playerName + " " + entry.worldName + " " + entry.x + " " + entry.y + " " + entry.z;
-			FileIO.appendDataEntryTo("register", data);
+			FileIO.appendDataEntryTo(DATA_NAME, data);
 		}
 	}
 }

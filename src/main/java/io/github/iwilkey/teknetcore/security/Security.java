@@ -123,6 +123,7 @@ public class Security {
 				lineDat[i] = lineDat[i].replace('-', ' ');
 				notes.add(lineDat[i]);
 			}
+			rec.notes = notes;
 			records.add(rec);
 		}
 	}

@@ -19,7 +19,25 @@ commands:
     usage: "Use '/listpos [no arguments] to see all of your current saved positions."
   delpos:
     description: Delete a specific position.
-    usage: "Use 'delpos [position-name]' to delete position [name]."
+    usage: "Use '/delpos [position-name]' to delete position [name]."
   goto:
     description: Teleport to one of your saved positions.
     usage: "Use '/goto [position-name]' to teleport to one of your saved positions."
+  silent:
+    description: Turn off your retrieval server-wide announcements.
+    usage: "Use '/silent' to turn off your retrieval server-wide announcements."
+  announce:
+    description: Turn on your retrieval server-wide announcements.
+    usage: "Use '/announce' to turn on your retrieval server-wide announcements."
+  back:
+    description: Return to your most recent death location!
+    usage: "Use '/back' to return to your most recent death location!"
+  warnings:
+    description: Check how many security warnings you currently have and why.
+    usage: "Use '/warnings' or '/warnings why' to show how many security warnings you currently have or why."
+  infractions:
+    description: Check how many security infractions you currently have.
+    usage: "Use '/infractions' to show how many security infractions you currently have."
+  police:
+    description: Call the police on a player breaking the rules.
+    usage: "Use '/police [username] [reason]' to make sure the player is brought to justice. Please contact an admin if more assistance is needed."

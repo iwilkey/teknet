@@ -52,10 +52,6 @@ public class GotoUtils {
 				+ "Create one at current location with '/savepos [name]'...", LogType.NOTICE);
 		else {
 			TeknetCore.informPlayer(player, "Here is a list of all your saved positions...", LogType.UTILITY);
-			player.sendMessage(" ");
-			player.sendMessage(ChatColor.ITALIC + "" + "Return to a position using the name or index like '/goto [name]' or '/goto [number-in-list]'." 
-					+ ChatColor.RESET + "");
-			player.sendMessage(" ");
 			for(int i = 0; i < positions.size(); i++)
 				player.sendMessage(ChatColor.ITALIC + "   [" + (i + 1) + "] \"" + ChatColor.GOLD + "" + positions.get(i).name + 
 						ChatColor.RESET + "" + "\" at " + 

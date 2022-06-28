@@ -54,10 +54,12 @@ public class AnnounceUtils {
 				if(token.length() == 0) continue;
 				if(token.charAt(0) == '$' && token.charAt(token.length() - 1) == '$')
 					line += command(token.substring(1, token.length() - 1)) + " ";
+				/* TODO: Fix this...
 				else if(token.substring(token.length() - 2, token.length()).equals("$?") ||
 					token.substring(token.length() - 2, token.length()).equals("$!") ||
 					token.substring(token.length() - 2, token.length()).equals("$."))
 					line += command(token.substring(1, token.length() - 2)) + " ";
+				 */
 				else line += token + " ";
 			}
 			ANNOUNCEMENTS.add(line);

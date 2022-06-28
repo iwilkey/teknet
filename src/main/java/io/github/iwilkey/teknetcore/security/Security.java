@@ -67,16 +67,16 @@ public class Security {
 	public static void policePlayer(Player sender, Player target, String reason) {
 		if(sender.getName().equals(target.getName())) 
 			sender.sendMessage("Interesting... you turning yourself in. Thank you for being honest, though.");
-		reason += " signed, " + sender.getName();
+		reason += ChatColor.ITALIC + "" + ChatColor.LIGHT_PURPLE + "signed, " + sender.getName() + ChatColor.RESET;
 		InfractionRecord infractions = infractionRecordOf(target);
 		for(String reasons : infractions.notes)
 			for(String s : reasons.split(" "))
 				if(s.equals(sender.getName())) {
-					Security.inform((Player)sender, "You have already sent this player a warning since last reset. We will take it from here.");
+					Security.inform((Player)sender, ChatColor.AQUA + "You have already sent this player a warning since last reset. We will take it from here." + ChatColor.RESET, false);
 					return;
 				}
 		Security.writeWarningTo(target, reason);
-		Security.inform(target, "Someone has called the police on you! Please be considerate of others.");
+		Security.inform(target, ChatColor.RED + "Someone has called the police on you! Please be considerate of others." + ChatColor.RESET, false);
 	}
 	
 	private static void inform(boolean infraction, Player player, String message) {
@@ -100,6 +100,14 @@ public class Security {
 		player.sendMessage(ChatColor.GRAY + "(If you believe this to be a mistake, please inform an admin right away and explain your side of the situation...)" + ChatColor.RESET);
 	}
 	
+	public static void inform(Player player, String message, boolean disclaim) {
+		String info = "";
+		info += ChatColor.BLUE + "" + ChatColor.BOLD + "[Teknet Security Record System] " + ChatColor.RESET;
+		info += ChatColor.ITALIC + ""+ message + ChatColor.RESET;
+		player.sendMessage(info);
+		if(disclaim) player.sendMessage(ChatColor.GRAY + "(If you believe this to be a mistake, please inform an admin right away and explain your side of the situation...)" + ChatColor.RESET);
+	}
+	
 	private static void translateRegister() {
 		if(!FileIO.fileExists(DATA_NAME)) FileIO.createDataFile(DATA_NAME);
 		records.clear();
@@ -110,6 +118,7 @@ public class Security {
 			rec.warnings = Integer.parseInt(lineDat[1]);
 			rec.infractions = Integer.parseInt(lineDat[2]);
 			ArrayList<String> notes = new ArrayList<String>();
+			// TODO FIX THIS...
 			for(int i = 3; i < lineDat.length; i++) {
 				lineDat[i] = lineDat[i].replace('-', ' ');
 				notes.add(lineDat[i]);

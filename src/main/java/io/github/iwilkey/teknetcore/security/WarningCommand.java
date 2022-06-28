@@ -17,12 +17,16 @@ public class WarningCommand implements CommandExecutor {
 			   " warning(s). If you get " + (Security.MAX_WARNINGS_BEFORE_INFRACTION - 
 					   Security.infractionRecordOf((Player)sender).warnings + 1) + " more warning(s) you will recieve an infraction!");
 		} else if(args.length == 1 && args[0].equals("why")) {
-			TeknetCore.informPlayer((Player)sender, "Here are the reasons for your current warnings...", LogType.UTILITY);
-			Security.InfractionRecord record = Security.infractionRecordOf((Player)sender);
-			int i = 0;
-			for(String line : record.notes) {
-				((Player)sender).sendMessage("   [" + i + "] " + line);
-				i++;
+			if(Security.infractionRecordOf((Player)sender).warnings == 0) {
+				TeknetCore.informPlayer((Player)sender, "You do not have any warnings to report. Good for you.", LogType.UTILITY);
+			} else {
+				TeknetCore.informPlayer((Player)sender, "Here are the reasons for your current warnings...", LogType.UTILITY);
+				Security.InfractionRecord record = Security.infractionRecordOf((Player)sender);
+				int i = 0;
+				for(String line : record.notes) {
+					((Player)sender).sendMessage("   [" + (i + 1) + "] " + line);
+					i++;
+				}
 			}
 		} else return false;
 		return true;

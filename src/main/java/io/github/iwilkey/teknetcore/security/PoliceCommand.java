@@ -11,12 +11,13 @@ public class PoliceCommand implements CommandExecutor {
 		if(!(sender instanceof Player)) return false;
 		if(args.length < 2) return false;
 		if(!Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(args[0]))) {
-			Security.inform((Player)sender, "The player you have specified is either not online or doesn't exist. Still, we logged this for review.");
+			Security.inform((Player)sender, "The player you have specified is either not online or doesn't exist. "
+					+ "Check your spelling and in the meantime, we still logged this complaint for review.", false);
 			return true;
 		}
 		Player target = Bukkit.getPlayer(args[0]);
 		String message = "";
-		for(int i = 2; i < args.length; i++)
+		for(int i = 1; i < args.length; i++)
 			message += args[i] + " ";
 		Security.policePlayer((Player)sender, target, message);
 		return true;

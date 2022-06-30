@@ -22,6 +22,7 @@ public class SetHomeCommand implements CommandExecutor {
 		if(!(sender instanceof Player)) return false;
 		Player player = (Player)sender;
 		Location location = player.getLocation();
+		player.setBedSpawnLocation(location, true);
 		String name = player.getName(),
 			worldName = player.getWorld().getName();
 		PlayerHomeData data = new PlayerHomeData(name, worldName, (float)location.getX(), (float)location.getY(), (float)location.getZ());

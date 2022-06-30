@@ -6,7 +6,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.utils.FileIO;
+import io.github.iwilkey.teknetcore.utils.LogType;
 
 public class HomeUtils {
 	
@@ -23,7 +25,7 @@ public class HomeUtils {
 		}
 	}
 	
-	private ArrayList<PlayerHomeData> homes;
+	private static ArrayList<PlayerHomeData> homes;
 	
 	public HomeUtils() {
 		homes = new ArrayList<PlayerHomeData>();
@@ -46,8 +48,12 @@ public class HomeUtils {
 		 return false;
 	}
 	
-	public void teleportHome(Player player, String name) {
+	public static void teleportHome(Player player, String name) {
 		PlayerHomeData data = getPlayerHomeData(name);
+		if(data == null) {
+			TeknetCore.informPlayer(player, "You do not have a home to teleport to! Create one with '/sethome'!", LogType.UTILITY);
+			return;
+		}
 		Location lpp = player.getLocation();
 		lpp.setX(data.x);
 		lpp.setY(data.y);
@@ -56,7 +62,7 @@ public class HomeUtils {
 		player.teleport(lpp);
 	}
 	
-	private PlayerHomeData getPlayerHomeData(String name) {
+	private static PlayerHomeData getPlayerHomeData(String name) {
 		for(PlayerHomeData entry : homes)
 			if(entry.playerName.equals(name))
 				return entry;

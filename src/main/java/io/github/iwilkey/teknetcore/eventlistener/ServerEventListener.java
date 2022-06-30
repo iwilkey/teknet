@@ -4,14 +4,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 import io.github.iwilkey.teknetcore.announcer.AnnounceUtils;
 import io.github.iwilkey.teknetcore.back.DeathUtils;
+import io.github.iwilkey.teknetcore.home.HomeUtils;
 import io.github.iwilkey.teknetcore.security.Security;
 
 public class ServerEventListener implements Listener {
@@ -45,9 +48,15 @@ public class ServerEventListener implements Listener {
 		e.setCancelled(true);
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onLiquidSpread(BlockFromToEvent e) {
-		e.setCancelled(true);
+		if(e.getBlock().getType() == Material.WATER) return;
+		e.setCancelled(false);
+	}
+	
+	@EventHandler
+	public void onPlayerRespawn(PlayerRespawnEvent e) {
+		HomeUtils.teleportHome(e.getPlayer(), e.getPlayer().getName());
 	}
 	
 }

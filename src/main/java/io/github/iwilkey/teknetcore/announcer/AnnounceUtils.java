@@ -11,7 +11,7 @@ import io.github.iwilkey.teknetcore.utils.FileIO;
 public class AnnounceUtils {
 	
 	private static final String PATH_TO_ANNOUNCEMENTS = "announcements";
-	public static final int SECONDS_PER_ANNOUCEMENT = 30;
+	public static final int SECONDS_PER_ANNOUCEMENT = 60 * 2;
 	
 	public static ArrayList<String> silentPref;
 	

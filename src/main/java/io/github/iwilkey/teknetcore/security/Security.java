@@ -65,16 +65,18 @@ public class Security {
 	}
 	
 	public static void policePlayer(Player sender, Player target, String reason) {
-		if(sender.getName().equals(target.getName())) 
-			sender.sendMessage("Interesting... you turning yourself in. Thank you for being honest, though.");
 		reason += ChatColor.ITALIC + "" + ChatColor.LIGHT_PURPLE + "signed, " + sender.getName() + ChatColor.RESET;
 		InfractionRecord infractions = infractionRecordOf(target);
 		for(String reasons : infractions.notes)
 			for(String s : reasons.split(" "))
-				if(s.equals(sender.getName())) {
-					Security.inform((Player)sender, ChatColor.AQUA + "You have already sent this player a warning since last reset. We will take it from here." + ChatColor.RESET, false);
+				if(s.equals(sender.getName() + ChatColor.RESET)) {
+					System.out.println(s);
+					Security.inform((Player)sender, ChatColor.AQUA + "You have already sent this player a warning since last reset. "
+							+ "We will take it from here." + ChatColor.RESET, false);
 					return;
 				}
+		if(sender.getName().equals(target.getName())) 
+			sender.sendMessage("Interesting... you turning yourself in. Thank you for being honest, though.");
 		Security.writeWarningTo(target, reason);
 		Security.inform(target, ChatColor.RED + "Someone has called the police on you! Please be considerate of others." + ChatColor.RESET, false);
 	}
@@ -89,7 +91,7 @@ public class Security {
 			info += ChatColor.ITALIC + ""+ message + ChatColor.RESET;
 		}
 		player.sendMessage(info);
-		player.sendMessage(ChatColor.GRAY + "(If you believe this to be a mistake, please inform an admin right away and explain your side of the situation...)" + ChatColor.RESET);
+		player.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "If you believe this to be a mistake or unnecessary, please inform an admin and explain your side of the situation...)" + ChatColor.RESET);
 	}
 	
 	public static void inform(Player player, String message) {

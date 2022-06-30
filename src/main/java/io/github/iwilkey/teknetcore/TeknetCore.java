@@ -78,7 +78,7 @@ public final class TeknetCore extends JavaPlugin {
 				+ "    2_|\\___|_|\\_\\_| |_|\\___1\\__|\\_____\\___/|_|  \\___|\n"
 				+ "                                                     \n\n"
 				+ "                                                     ");
-		Bukkit.broadcastMessage("TeknetCore has been updated. Water can now flow freely.");
+		Bukkit.broadcastMessage("TeknetCore has been updated. Water can now flow freely!");
 	}
 	
 	@Override

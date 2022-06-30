@@ -1,0 +1,199 @@
+[
+	{
+		"ingredients" : [
+			[ { "registryName" : "Railcraft:part.plate" }, { "registryName" : "Railcraft:part.plate" } ],
+			[ { "registryName" : "Forestry:gearBronze" }, { "registryName" : "Railcraft:part.plate" } ],
+			[ { "registryName" : "Railcraft:part.plate" }, { "registryName" : "Railcraft:part.plate" } ]
+		],
+		"result" : {
+			"oredictName" : "componentPlatingBasic"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "registryName" : "BuildCraft|Core:diamondGearItem" }, { "registryName" : "Railcraft:part.plate", "meta":1 } ],
+			[ { "registryName" : "Railcraft:part.plate", "meta":1 }, { "registryName" : "Railcraft:part.plate", "meta":1 } ],
+			[ { "registryName" : "BuildCraft|Core:diamondGearItem" }, { "registryName" : "Railcraft:part.plate", "meta":1 } ]
+		],
+		"result" : {
+			"oredictName" : "componentPlatingAdvanced"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "oredictName" : "componentWiring" }, { "oredictName" : "dyeGreen" }, { "registryName" : "bluepower:purple_alloy_ingot" } ],
+			[ { "oredictName" : "dustRedstone" }, { "registryName" : "BuildCraft|Transport:pipeGate" }, { "oredictName" : "dyeGreen" } ],
+			[ { "registryName" : "bluepower:purple_alloy_ingot" }, { "oredictName" : "dustRedstone" }, { "oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"oredictName" : "componentControlCircuit"
+		},
+		"mirror" : true
+	},
+	{
+		"ingredients" : [
+			[ { "oredictName" : "dustGlowstone" }, { "registryName" : "Railcraft:glass" }, { "oredictName" : "dyeGreen" } ],
+			[ { "registryName" : "Railcraft:glass" }, { "registryName" : "BuildCraft|Transport:pipeGate" }, { "registryName" : "Railcraft:glass" } ],
+			[ { "oredictName" : "dyeBlue" }, { "registryName" : "Railcraft:glass" }, { "oredictName" : "dyeRed" } ]
+		],
+		"result" : {
+			"oredictName" : "componentLaserEmitter"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "registryName" : "Railcraft:glass" }, { "oredictName" : "gemEmerald" }, { "registryName" : "Railcraft:glass" } ],
+			[ { "registryName" : "bluepower:purple_alloy_ingot" }, { "registryName" : "Forestry:sturdyMachine" }, { "registryName" : "bluepower:purple_alloy_ingot" } ],
+			[ { "registryName" : "Railcraft:glass" }, { "registryName" : "BuildCraft|Transport:item.buildcraftPipe.pipepowergold" }, { "registryName" : "Railcraft:glass" } ]
+		],
+		"result" : {
+			"registryName" : "powersuits:tile.tinkerTable"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "oredictName" : "ingotBronze" }, { "oredictName" : "ingotBronze" }, { "oredictName" : "ingotBronze" } ],
+			[ { "oredictName" : "componentWiring" }, null, { "oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"registryName" : "powersuits:item.powerArmorHelmet"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "oredictName" : "ingotBronze" }, null, { "oredictName" : "ingotBronze" } ],
+			[ { "oredictName" : "componentWiring" }, { "oredictName" : "ingotBronze" }, { "oredictName" : "componentWiring" } ],
+			[ { "oredictName" : "ingotBronze" }, { "oredictName" : "ingotBronze" }, { "oredictName" : "ingotBronze" } ]
+		],
+		"result" : {
+			"registryName" : "powersuits:item.powerArmorChestplate"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "oredictName" : "ingotBronze" }, { "oredictName" : "ingotBronze" }, { "oredictName" : "ingotBronze" } ],
+			[ { "oredictName" : "componentWiring" }, null, { "oredictName" : "componentWiring" } ],
+			[ { "oredictName" : "ingotBronze" }, null, { "oredictName" : "ingotBronze" } ]
+		],
+		"result" : {
+			"registryName" : "powersuits:item.powerArmorLeggings"
+		}
+	},
+	{
+		"ingredients" : [
+			[ { "oredictName" : "componentWiring" }, null, { "oredictName" : "componentWiring" } ],
+			[ { "oredictName" : "ingotBronze" }, null, { "oredictName" : "ingotBronze" } ]
+		],
+		"result" : {
+			"registryName" : "powersuits:item.powerArmorBoots"
+		}
+	},
+	{
+		"ingredients" : [
+			[ null, { "oredictName" : "componentWiring" }, null ],
+			[ { "oredictName" : "componentWiring" }, { "registryName" : "RedstoneArsenal:material", "meta":32 }, null ],
+			[ null, { "registryName" : "RedstoneArsenal:material", "meta":32 }, { "oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"registryName" : "powersuits:item.powerFist"
+		}
+	},
+	{
+		"ingredients" : [
+			[  {"registryName" : "bluepower:purple_alloy_ingot" }, { "registryName" : "bluepower:red_alloy_ingot" }, {"registryName" : "bluepower:purple_alloy_ingot" } ]
+		],
+		"result" : {
+			"oredictName" : "componentWiring",
+			"quantity" : 8
+		}
+	},
+	{
+		"ingredients" : [
+			[  { "registryName" : "minecraft:wool" }, { "registryName" : "minecraft:wool" }, { "registryName" : "minecraft:wool" } ],
+			[  {"registryName" : "minecraft:string" }, null, {"registryName" : "minecraft:string" } ],
+			[  null, {"registryName" : "Forestry:minerBag" }, null ]
+		],
+		"result" : {
+			"oredictName" : "componentParachute"
+		}
+	},
+	{
+		"ingredients" : [
+			[  {"oredictName" : "ingotSilver" }, { "registryName" : "eng_toolbox:modular_socket" }, {"oredictName" : "ingotGold" } ],
+			[  {"oredictName" : "componentWiring" }, null, {"oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"oredictName" : "componentLVCapacitor"
+		}
+	},
+	{
+		"ingredients" : [
+			[  {"oredictName" : "componentWiring" }, { "registryName" : "eng_toolbox:Module", "meta":79 }, {"oredictName" : "componentWiring" } ],
+			[  {"oredictName" : "componentWiring" }, null, {"oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"oredictName" : "componentMVCapacitor"
+		}
+	},
+	{
+		"ingredients" : [
+			[  {"registryName" : "BigReactors:BRIngot", "meta":8 }, { "registryName" : "BuildCraft|Silicon:redstoneCrystal" }, {"registryName" : "BigReactors:BRIngot", "meta":8 } ],
+			[  {"oredictName" : "componentWiring" }, null, {"oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"oredictName" : "componentHVCapacitor"
+		}
+	},
+	{
+		"ingredients" : [
+			[  {"oredictName" : "componentWiring" }, { "registryName" : "bluepower:blue_alloy_ingot" }, {"oredictName" : "componentWiring" } ],
+			[  {"oredictName" : "componentWiring" }, { "registryName" : "bluepower:blue_alloy_ingot" }, {"oredictName" : "componentWiring" } ],
+			[  {"oredictName" : "componentWiring" }, { "registryName" : "bluepower:blue_alloy_ingot" }, {"oredictName" : "componentWiring" } ]
+		],
+		"result" : {
+			"oredictName" : "componentSolenoid"
+		}
+	},
+	{
+		"ingredients" : [
+			[  null, { "registryName" : "Railcraft:glass" }, {"registryName" : "Railcraft:glass" } ],
+			[  {"registryName" : "Railcraft:glass" }, {"registryName" : "Railcraft:glass" }, {"oredictName" : "componentSolenoid" }],
+			[  {"registryName" : "Railcraft:glass" }, null, null]
+		],
+		"result" : {
+			"oredictName" : "componentGliderWing"
+		}
+	},
+	{
+		"ingredients" : [
+			[  null, { "oredictName" : "componentSolenoid" }, null ],
+			[  { "oredictName" : "componentWiring" }, { "registryName" : "JAKJ_RedstoneInMotion:tile.JAKJ_RedstoneInMotion_CarriageDrive", meta:1 }, { "oredictName" : "componentWiring" } ],
+			[  null, { "oredictName" : "componentSolenoid" }, null ]
+		],
+		"result" : {
+			"oredictName" : "componentServo"
+		}
+	},
+	{
+		"ingredients" : [
+			[  {"oredictName" : "componentSolenoid" }, { "registryName" : "minecraft:ender_pearl" }, {"oredictName" : "componentSolenoid" } ],
+			[  {"registryName" : "minecraft:ender_pearl" }, { "registryName" : "LogisticsPipes:logisticsSolidBlock", "meta":11 }, {"registryName" : "minecraft:ender_pearl" } ],
+			[  {"oredictName" : "componentSolenoid" }, { "registryName" : "minecraft:ender_pearl" }, {"oredictName" : "componentSolenoid" } ]
+		],
+		"result" : {
+			"oredictName" : "componentFieldEmitter"
+		},
+		"mirror" : true
+	},
+	{
+		"ingredients" : [
+			[  null, { "oredictName" : "componentFieldEmitter" }, {"oredictName" : "componentSolenoid" } ],
+			[  {"registryName" : "RedstoneArsenal:material", "meta":32 }, {"oredictName" : "dustGlowstone" }, null],
+			[  {"oredictName" : "componentWiring" }, {"oredictName" : "componentFieldEmitter" }, {"oredictName" : "componentSolenoid" } ]
+		],
+		"result" : {
+			"oredictName" : "componentIonThruster"
+		}
+
+	}
+]

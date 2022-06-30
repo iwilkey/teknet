@@ -1,0 +1,61 @@
+Server Notes
+
+- Companies
+    Players can create a company and claim an item to make
+    They then define an "overhead" chest that will search for their item
+    every "payday". Owners can hire people, create ranks, ect for their companies too.
+    Oh yeah, people cannot sell 
+
+- Shop
+    - All items (by catagory, then random price from there with variance)
+
+- Server ranks (CEO of [Their company])
+
+- Moderator tools
+
+- Add Nova Catalist to "banned" TNT
+
+Look at these items:
+
+improved rocket launcher <--- Bad!
+four headed dragon <-- Okay!
+modified coin launcher <-- Okay!
+lapis coil <-- Okay!
+thorn spitter <--- Okay!
+proximity thorn thrower <--- Okay!
+fireworks rocket launcher <--- Bad!
+arrow mortar <--- Okay!
+compact crossbow <--- Okay!
+dragon mortar <--- Okay!
+potatosser <--- Okay!
+Snow Cannon  <--- Okay!
+Ender Rifle  <--- Okay!
+Frost Lancer <--- Okay!
+obsidian splinter pistol  <--- Okay!
+obsidian spear rifle   <--- Okay!
+obsidian wither rifle <--- Okay!
+lightning red -- ?
+sunray <-- it's on the cusp...
+powder knuckle <-- Okay! And fun
+modified powder knuckle <-- Okay! And fun
+Nether Bellows <--- Bad!!
+Redstone Sprayer <-- Okay!
+seed Sweeper <-- Okay! And fun
+Ender Rail Accelerator <---- Bad!!
+hidden ender pistol <--- Okay!
+Fen Fire  <--- Okay!
+Soul Cairn  <--- Okay!
+Aqua Accelerator <--- Bad
+Silken Spinner <--- Okay!
+All Mining Turtles <--- Check this out.
+Robot 4161 (Bomber) <--- don't trust (restirct)
+Robot 4161 (Builder) <--- don't trust (restirct)
+Robot 4161 (Shovelman) <--- don't trust (restirct)
+Robot 4161 (Butcher) <--- don't trust (restirct)
+Begginners Mining Turtle  <--- Check this out.
+Block Breaker <--- Fine? Check out.
+Blade launcher module 
+lux capacitor module
+Nova Cataclysms <----- TNT!
+Nova Catalysts <----- TNT!
+All chunk loaders but personal anchors <------ restrict...

@@ -1,1 +1,0 @@
-java -Xmx6G -Xms5G -XX:MaxPermSize=128m -jar "KCauldron.jar" nogui

@@ -51,15 +51,9 @@ public final class TeknetDevelopment extends JavaPlugin {
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
-						
 						try {
 							target = null;
 							target = Bukkit.getPluginManager().loadPlugin(f);
-							try {
-								Thread.sleep(2000);
-							} catch (InterruptedException e1) {
-								e1.printStackTrace();
-							}
 						} catch (UnknownDependencyException e) {
 							e.printStackTrace();
 						} catch (InvalidPluginException e) {
@@ -74,8 +68,8 @@ public final class TeknetDevelopment extends JavaPlugin {
 						version++;
 						for(Player p : Bukkit.getOnlinePlayers())
 							p.playSound(p.getLocation(), sx, 100.0f, 0.0f);
-						Bukkit.broadcastMessage(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD +
-								"[TeknetCore] " + ChatColor.RESET + "" + ChatColor.GRAY 
+						Bukkit.broadcastMessage(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD +
+								"[" + ChatColor.DARK_PURPLE + "TeknetDevelopment" + ChatColor.LIGHT_PURPLE + "]" + ChatColor.RESET + "" + ChatColor.GRAY 
 								+ "" + ChatColor.ITALIC + "A new TeknetCore update is now live!" + ChatColor.RESET);
 						break;
 					}

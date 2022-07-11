@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
+import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
@@ -30,6 +31,12 @@ public class ServerEventListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerCommandRequest(PlayerCommandPreprocessEvent e) {
+		e.setMessage(e.getMessage().toLowerCase());
+		if(e.getMessage().equals("/help")) {
+			TeknetCore.printAllHelp(e.getPlayer());
+			e.setCancelled(true);
+			return;
+		}
 		if(e.getMessage().equals("/cooldown")) return;
 		Cooldown.registerActivity(e.getPlayer(), e.getMessage());
 		if(!Cooldown.can(e.getPlayer())) {

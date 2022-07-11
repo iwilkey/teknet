@@ -17,7 +17,7 @@ public class ChatUtilities {
 			}
 			public void write(String content, int line) {
 				if(line >= 9) return;
-				if(content.length() >= 60) content = content.substring(0, 60);
+				if(content.length() >= 75) content = content.substring(0, 75);
 				lines[line] = highlightCommands(content, ChatColor.WHITE);
 			}
 			public void renderTo(Player player) {
@@ -29,12 +29,12 @@ public class ChatUtilities {
 		// <=60 characters per line
 		// A document can have up to several pages.
 		public String name;
-		private ArrayList<Page> pages;
+		public ArrayList<Page> pages;
 		public CommandDocumentation(String name) {
 			this.name = name;
 			pages = new ArrayList<>();
 			Page page = new Page();
-			page.write(ChatColor.GRAY + "Use [" + name.toLowerCase() + "-help-<n>] " + ChatColor.GRAY + " for page n of " + name.toLowerCase() + " help!" + ChatColor.RESET, 0);
+			page.write(ChatColor.GRAY + "Use [" + name.toLowerCase() + "-help-(n-OR-'all')] " + ChatColor.GRAY + " for page n (or all)." + ChatColor.RESET, 0);
 			pages.add(page);
 		}
 		public void addPage(Page page) {
@@ -45,14 +45,17 @@ public class ChatUtilities {
 			return pages.get(page);
 		}
 		public void renderPageTo(Player player, int page) {
-			if(page >= pages.size()) return;
+			if(page >= pages.size() || page < 0)  {
+				logTo(player, "This manual does not contain the page you have entered!", LogType.FATAL);
+				return;
+			}
 			messageTo(player, "------- " + name + ": Index (" + (page + 1) + "/" + pages.size() + ") -------", ChatColor.WHITE);
 			pages.get(page).renderTo(player);
 		}
 	}
 	
 	public enum LogType {
-		SUCCESS, NOTICE, FATAL, UTILITY
+		SUCCESS, NOTICE, FATAL, UTILITY, ADMIN_UTILITY
 	}
 	
 	static final ChatColor r = ChatColor.RESET,
@@ -95,6 +98,9 @@ public class ChatUtilities {
 					ChatColor.DARK_RED, ChatColor.GRAY); break;
 			case UTILITY: ChatUtilities.tagAndMessageTo(player, "TeknetCore Utilities", m, ChatColor.BLUE, 
 					ChatColor.DARK_BLUE, ChatColor.GRAY); break;
+			case ADMIN_UTILITY: ChatUtilities.tagAndMessageTo(player, "TeknetCore Admin Utilities", m, ChatColor.LIGHT_PURPLE, 
+					ChatColor.DARK_PURPLE, ChatColor.GRAY); break;
+				
 		}
 	}
 	

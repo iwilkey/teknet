@@ -69,8 +69,8 @@ public final class TeknetDevelopment extends JavaPlugin {
 						for(Player p : Bukkit.getOnlinePlayers())
 							p.playSound(p.getLocation(), sx, 100.0f, 0.0f);
 						Bukkit.broadcastMessage(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD +
-								"[" + ChatColor.DARK_PURPLE + "TeknetDevelopment" + ChatColor.LIGHT_PURPLE + "]" + ChatColor.RESET + "" + ChatColor.GRAY 
-								+ "" + ChatColor.ITALIC + "A new TeknetCore update is now live!" + ChatColor.RESET);
+								"[" + ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "TeknetDevelopment" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "]" + ChatColor.RESET + "" + ChatColor.GRAY 
+								+ "" + ChatColor.ITALIC + " A new TeknetCore update is now live!" + ChatColor.RESET);
 						break;
 					}
 				}

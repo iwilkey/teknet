@@ -6,6 +6,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
+import io.github.iwilkey.teknetcore.economy.Shop;
 import io.github.iwilkey.teknetcore.eventlistener.ServerEventListener;
 import io.github.iwilkey.teknetcore.location.Locations;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
@@ -51,6 +52,7 @@ public final class TeknetCore extends JavaPlugin {
         new SoundUtilities();
         new Ranks();
         new Locations();
+        new Shop();
 	}
 	
 	private void registerCommands() {
@@ -62,6 +64,9 @@ public final class TeknetCore extends JavaPlugin {
 		getCommand("home").setExecutor(new Locations.Home.HomeCommand(Rank.HOBBYIST));
 		getCommand("sethome").setExecutor(new Locations.Home.SetHome(Rank.HOBBYIST));
 		getCommand("position").setExecutor(new Locations.Positions.PositionCommand(Rank.HOBBYIST));
+		
+		// Economy
+		getCommand("shop").setExecutor(new Shop.ShopCommand(Rank.HOBBYIST));
 		
 		// Admin utilities
 		getCommand("ranks").setExecutor(new Ranks.AdminRankUtilities(Rank.ADMIN));
@@ -84,6 +89,7 @@ public final class TeknetCore extends JavaPlugin {
 					}
 					Cooldown.tick();
 					Locations.tick();
+					Shop.tick();
 				}
 			}, 0l, 1l);
 	}
@@ -91,13 +97,9 @@ public final class TeknetCore extends JavaPlugin {
 	private static void initDocumentation() {
 		int page = 0;
 		doc = new CommandDocumentation("TeknetCore");
-		doc.editPage(page).write(ChatColor.GOLD + "TeknetCore is a custom Java plugin designed and programmed" + ChatColor.RESET, 1);
-		doc.editPage(page).write(ChatColor.GOLD + "    by Ian Wilkey (yoimian) Ⓒ 2022" + ChatColor.RESET, 2);
-		doc.editPage(page).write("Version: " + ChatColor.AQUA + "1.100.D (Development)" + ChatColor.RESET, 3);
-		doc.editPage(page).write("TeknetDevelopment Version: " + ChatColor.AQUA + "1.100.F (Final)" + ChatColor.RESET, 4);
-		doc.editPage(page).write(ChatColor.DARK_AQUA + "Documentation format...", 5);
-		doc.editPage(page).write(ChatColor.GRAY + "► (command) (argument(s)...) [lowest rank permission]" + ChatColor.RESET, 6);
-		doc.editPage(page).write(ChatColor.GRAY + "    (description...)" + ChatColor.RESET, 7);
+		doc.editPage(page).write(ChatColor.GOLD + "TeknetCore is a custom Java plugin designed and programmed" + ChatColor.RESET, 3);
+		doc.editPage(page).write(ChatColor.GOLD + "    by Ian Wilkey (yoimian) Ⓒ 2022" + ChatColor.RESET, 4);
+		doc.editPage(page).write("    Version: " + ChatColor.AQUA + "1.100.D (Development)" + ChatColor.RESET, 5);
 		doc.editPage(page).write(ChatColor.GRAY + "------- Press 't' and scroll up -------" + ChatColor.RESET, 8);
 		doc.addPage(new Page());
 		page = 1;

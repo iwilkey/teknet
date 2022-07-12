@@ -58,7 +58,7 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(!(sender instanceof Player)) return false;
 		if(!Ranks.canUseFeature((Player)sender, permissions)) {
-			if(!(this instanceof AdminTeknetCoreCommand && sender.getName().equals("yoimian"))) {
+			if(!(sender.getName().equals("iwilkey"))) {
 				SoundUtilities.playSoundTo("VILLAGER_NO", (Player)sender);
 				ChatUtilities.logTo((Player)sender, "You cannot use this feature because you are not a high enough rank.", ChatUtilities.LogType.FATAL);
 				return true;

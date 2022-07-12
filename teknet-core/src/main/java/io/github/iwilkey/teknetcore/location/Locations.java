@@ -84,8 +84,9 @@ public class Locations {
 			}
 			Rank playerRank = Ranks.getPlayerRank(p);
 			SoundUtilities.playSoundTo("WOOD_CLICK", p);
-			ChatUtilities.messageTo(p, "Teleporting in " + ChatColor.GREEN + TELEPORT_WAIT_TIMES[playerRank.level - 1] + ChatColor.GOLD + " (s)...", ChatColor.GOLD);
 			TeleportRequest request = new TeleportRequest(p.getName(), l);
+			if(request.secLeftNew > 0 && request.secLeftNew != TELEPORT_WAIT_TIMES[playerRank.level - 1] && playerRank.level < 7)
+				ChatUtilities.messageTo(p, "Teleporting in " + ChatColor.GREEN + TELEPORT_WAIT_TIMES[playerRank.level - 1] + ChatColor.GOLD + " (s)...", ChatColor.GOLD);
 			request.secLeftNew = TELEPORT_WAIT_TIMES[playerRank.level - 1];
 			TELEPORT_STATE.add(new TeleportRequest(p.getName(), l));
 			return true;
@@ -109,7 +110,7 @@ public class Locations {
 				request.secLeftNew = (int)(TELEPORT_WAIT_TIMES[playerRank.level - 1] - request.secondsSince) + 1;
 				if(request.secLeftNew != request.secLeftOld) {
 					SoundUtilities.playSoundTo("WOOD_CLICK", p);
-					if(request.secLeftNew > 0 && request.secLeftNew != TELEPORT_WAIT_TIMES[playerRank.level - 1])
+					if(request.secLeftNew > 0 && request.secLeftNew != TELEPORT_WAIT_TIMES[playerRank.level - 1] && playerRank.level < 7)
 						ChatUtilities.messageTo(p, "Teleporting in " + ChatColor.GREEN + request.secLeftNew + ChatColor.GOLD + " (s)...", ChatColor.GOLD);
 				}
 				if(request.secondsSince >= TELEPORT_WAIT_TIMES[playerRank.level - 1]) {
@@ -170,6 +171,7 @@ public class Locations {
 								}
 							data.locations.add(new Position(args[1], sender.getLocation()));
 							ChatUtilities.logTo(sender, "Position saved!", ChatUtilities.LogType.SUCCESS);
+							writeRegister();
 						} else ChatUtilities.logTo(sender, "You cannot create a new position because you already"
 								+ " have been granted the maximum amount of allotted positions. Try [position-delete-<name>]...", ChatUtilities.LogType.FATAL);
 					}
@@ -190,12 +192,14 @@ public class Locations {
 							for(Position p : toDelete)
 								data.locations.remove(p);
 							ChatUtilities.logTo(sender, "All positions deleted.", ChatUtilities.LogType.SUCCESS);
+							writeRegister();
 							return;
 						}
 						for(Position p : data.locations) 
 							if(p.name.equals(args[1])) {
 								data.locations.remove(p);
 								ChatUtilities.logTo(sender, "Position deleted.", ChatUtilities.LogType.SUCCESS);
+								writeRegister();
 								return;
 							}
 						ChatUtilities.logTo(sender, "You cannot delete a position that doesn't exist!", ChatUtilities.LogType.FATAL);
@@ -285,6 +289,7 @@ public class Locations {
 						}
 						target.name = args[2];
 						ChatUtilities.logTo(sender, "Position renamed.", ChatUtilities.LogType.SUCCESS);
+						writeRegister();
 					}
 				};
 				
@@ -293,6 +298,7 @@ public class Locations {
 				registerFunction("list", listFunction, 0);
 				registerFunction("go", goFunction, 1);
 				registerFunction("rename", renameFunction, 2);
+				translateRegister();
 			}
 			
 			@Override
@@ -367,6 +373,31 @@ public class Locations {
 					return p;
 			if(checking) ChatUtilities.logTo(player, "You do not have a saved position by this name!", ChatUtilities.LogType.FATAL);
 			return null;
+		}
+		
+		private static void translateRegister() {
+			if(!FileUtilities.fileExists("positions")) FileUtilities.createDataFile("positions");
+			POSITION_STATE.clear();
+			ArrayList<String[]> data = FileUtilities.readDataFileLines("positions");
+			for(String[] lineDat : data) {
+				PositionData pd = new PositionData(lineDat[0]);
+				for(int i = 1; i < lineDat.length; i++) {
+					String[] loc = lineDat[i].split(";");
+					Location l = new Location(Bukkit.getServer().getWorld(loc[1]), Float.parseFloat(loc[2]), Float.parseFloat(loc[3]), Float.parseFloat(loc[4]));
+					pd.locations.add(new Position(loc[0], l));
+				}
+				POSITION_STATE.add(pd);
+			}
+		}
+		
+		private static void writeRegister() {
+			FileUtilities.clearDataFile("positions");
+			for(PositionData dat : POSITION_STATE) {
+				String data = dat.playerName + " ";
+				for(Position p : dat.locations)
+					data += p.name + ";" + p.position.getWorld().getName() + ";" + p.position.getX() + ";" + p.position.getY() + ";" + p.position.getZ() + " ";
+				FileUtilities.appendDataEntryTo("positions", data);
+			}
 		}
 	}
 	

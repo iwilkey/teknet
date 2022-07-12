@@ -20,3 +20,6 @@ commands:
    position:
       description: Save and teleport to locations. Use /position help to get started.
       usage: "Use /position <command> <opt-argument> to utilise tool."
+   shop:
+      description: Use the server store!
+      usage: "Use /shop <no arguments> to open the shop!"

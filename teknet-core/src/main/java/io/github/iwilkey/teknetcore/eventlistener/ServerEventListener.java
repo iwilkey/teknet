@@ -7,15 +7,20 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
+import io.github.iwilkey.teknetcore.economy.Shop;
+import io.github.iwilkey.teknetcore.economy.Shop.ShopSession;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
 
 public class ServerEventListener implements Listener {
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public static void onPlayerChat(AsyncPlayerChatEvent e) { 
 		Cooldown.registerActivity(e.getPlayer(), "CHAT_EVENT");
 		if(!Cooldown.can(e.getPlayer())) {
@@ -29,10 +34,10 @@ public class ServerEventListener implements Listener {
 		e.setCancelled(true);
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public static void onPlayerCommandRequest(PlayerCommandPreprocessEvent e) {
 		e.setMessage(e.getMessage().toLowerCase());
-		if(e.getMessage().equals("/help")) {
+		if(e.getMessage().equals("/help") || e.getMessage().equals("/teknetcore help")) {
 			TeknetCore.printAllHelp(e.getPlayer());
 			e.setCancelled(true);
 			return;
@@ -44,6 +49,33 @@ public class ServerEventListener implements Listener {
 					ChatColor.GRAY + " (s) before you can execute more commands! Use [cooldown] to see how much time you have left to wait.", ChatUtilities.LogType.FATAL);
 			e.setCancelled(true);
 			return;
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerMove(PlayerMoveEvent e) {
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) {
+			ChatUtilities.messageTo(e.getPlayer(), "You cannot move during while shopping! Done? [shop-checkout]", ChatColor.GRAY);
+			e.getPlayer().teleport(s.startedAt);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerItemDrop(PlayerDropItemEvent e) {
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) {
+			ChatUtilities.messageTo(e.getPlayer(), "You cannot drop items while shopping! Done? [shop-checkout]", ChatColor.GRAY);
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerInteraction(PlayerInteractEvent e) {
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) {
+			ChatUtilities.messageTo(e.getPlayer(), "You cannot interact with anything while shopping! Done? [shop-checkout]", ChatColor.GRAY);
+			e.setCancelled(true);
 		}
 	}
 	

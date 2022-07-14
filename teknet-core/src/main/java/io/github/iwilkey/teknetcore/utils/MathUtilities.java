@@ -7,4 +7,8 @@ public class MathUtilities {
 		Random r = new Random();
 		return r.nextInt(high - low) + low;
 	}
+	public static double randomDoubleBetween(double low, double high) {
+		Random r = new Random();
+		return low + r.nextDouble() * (high - low);
+	}
 }

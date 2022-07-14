@@ -24,6 +24,17 @@ public class ChatUtilities {
 				for(int i = 0; i < 9; i++) 
 					messageTo(player, lines[i], ChatColor.WHITE);
 			}
+			public boolean searchFor(String word) {
+				for(String line : lines) {
+					String[] words = line.split(" ");
+					
+					for(String w : words) {
+						if(w.replaceAll("[^A-Za-z]+", "").contains(word))
+							return true;
+					}
+				}
+				return false;
+			}
 		}
 		// 10 lines to show.
 		// <=60 characters per line
@@ -51,6 +62,15 @@ public class ChatUtilities {
 			}
 			messageTo(player, "------- " + name + ": Index (" + (page + 1) + "/" + pages.size() + ") -------", ChatColor.WHITE);
 			pages.get(page).renderTo(player);
+		}
+		public int searchFor(String word) {
+			int pp = 0;
+			for(Page p : pages) {
+				if(p.searchFor(word))
+					return pp;
+				pp++;
+			}
+			return -1;
 		}
 	}
 	

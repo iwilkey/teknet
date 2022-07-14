@@ -1,8 +1,6 @@
 package io.github.iwilkey.teknetcore.economy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,8 +11,10 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import io.github.iwilkey.teknetcore.TeknetCoreCommand;
+import io.github.iwilkey.teknetcore.economy.Bank.Currency;
 import io.github.iwilkey.teknetcore.economy.Shop.Store.Catagory.ShopItem;
 import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
@@ -28,9 +28,7 @@ public class Shop {
 
 		public ShopCommand(Rank permissions) {
 			super("shop", permissions);
-			
 			Function prices = new Function() {
-
 				@Override
 				public void func(Player sender, String[] args) {
 					if(args.length == 1) Store.showItemsForSale(sender, 1);
@@ -40,21 +38,89 @@ public class Shop {
 							page = Integer.parseInt(args[1]);
 							Store.showItemsForSale(sender, page);
 						} catch(Exception e) {
-							ChatUtilities.logTo(sender, 
-									"Searching catalog for " + args[1].toUpperCase() + "...", ChatUtilities.LogType.UTILITY);
-							int pp = Store.catalog.searchFor(args[1].toUpperCase());
-							if(pp == -1) {
+							ArrayList<Integer> pp = Store.catalog.searchFor(args[1].toUpperCase());
+							if(pp.size() == 0) {
 								ChatUtilities.logTo(sender, 
-										"TeknetCore could not find your catalog search inquiry. Please check spelling and try again.", ChatUtilities.LogType.FATAL);
+										"TeknetCore could not find your catalog search inquiry! "
+										+ ChatColor.GOLD + "Please check spelling and make sure your inquiry has no spaces or special characters.", ChatUtilities.LogType.FATAL);
 							} else {
-								Store.showItemsForSale(sender, pp + 1);
+								ChatUtilities.logTo(sender, 
+										"Found " + pp.size() + " result(s) for inquiry\n" + 
+												ChatColor.GOLD + args[1].toUpperCase() + ChatColor.GRAY + 
+												"...", ChatUtilities.LogType.SUCCESS);
+								String results = "To visit pages, use [shop-catalog-<page>] with <page>: ";
+								boolean toggle = false;
+								int ps = 0;
+								for(int i : pp) {
+									results += ((toggle) ? ChatColor.BLUE : ChatColor.DARK_AQUA) + Integer.toString(i + 1);
+									if(ps != pp.size() - 1) results += ChatColor.GRAY + ", ";
+									toggle = !toggle;
+									ps++;
+								}
+								ChatUtilities.messageTo(sender, results, ChatColor.GRAY);
 							}
 						}
 					}
 				}
 			};
 			
-			registerFunction("prices", prices, 1);
+			Function startSession = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					startShopSession(sender);
+				}
+			};
+			
+			Function endSession = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					Bank.Currency total = getCurrentShopSessionSubtotal(sender, false);
+					if(total == null) return;
+					Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+					ChatUtilities.messageTo(sender, 
+							"+ Account chosen: " + a.name + " -> " + a.amount.printValueColored(), 
+							ChatColor.GRAY);
+					ChatUtilities.messageTo(sender, 
+							"- Total due: " + total.printValueColored(), 
+							ChatColor.GRAY);
+					if(!a.subtract(sender, total)) {
+						ChatUtilities.messageTo(sender, 
+								"Payment declined! Please try a different method of payment or [shop-quit]", 
+								ChatColor.DARK_RED);
+						return;
+					} else {
+
+						ItemStack[] items = sender.getInventory().getContents();
+						for(ItemStack i : items) {
+							try {
+								sender.getWorld().dropItem(sender.getLocation(), i);
+							} catch(Exception e) {}
+						}
+					}
+					stopShopSession(sender);
+				}
+			};
+			
+			Function subtotal = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					getCurrentShopSessionSubtotal(sender, true);
+				}
+			};
+			
+			Function quit = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					sender.getInventory().clear();
+					stopShopSession(sender);
+				}
+			};
+			
+			registerFunction("catalog", prices, "search", "items");
+			registerFunction("buy", startSession, 0, "b");
+			registerFunction("checkout", endSession, 0, "c");
+			registerFunction("subtotal", subtotal, 0, "sub", "s");
+			registerFunction("quit", quit, 0, "q");
 		}
 
 		@Override
@@ -64,8 +130,6 @@ public class Shop {
 
 		@Override
 		public boolean logic(Player sender, Command command, String label, String[] args) {
-			startShopSession(sender);
-			ChatUtilities.logTo(sender, "Shop session started!", ChatUtilities.LogType.SUCCESS);
 			return true;
 		}
 		
@@ -74,12 +138,14 @@ public class Shop {
 	public static class ShopSession {
 		public String playerName;
 		public Location startedAt;
-		public Inventory survivalInventory,
-			shopBasket;
+		public Inventory shopBasket;
+		public ItemStack[] survivalInventory,
+			survivalArmor;
 		public ShopSession(Player player) {
 			this.playerName = player.getName();
 			startedAt = player.getLocation();
-			survivalInventory = player.getInventory();
+			survivalInventory = player.getInventory().getContents();
+			survivalArmor = player.getInventory().getArmorContents();
 			shopBasket = Bukkit.createInventory(player, InventoryType.PLAYER, "Shop Basket");
 			player.getInventory().setContents(shopBasket.getContents());
 			player.setGameMode(GameMode.CREATIVE);
@@ -103,13 +169,13 @@ public class Shop {
 			}
 			public enum Value {
 				MINECRAFT(3, 1),
-				BUILDCRAFTCORE(2, 1),
+				BUILDCRAFTCORE(1, 1),
 				BUILDCRAFTTRANSPORT(2, 1),
 				BUILDCRAFTSILICON(2, 1),
 				BUILDCRAFTFACTORY(2, 1),
 				COMPUTERCRAFT(5, 1),
-				IC2(3, 1),
-				FORESTRY(2, 1),
+				IC2(2, 1),
+				FORESTRY(1, 1),
 				BIGREACTORS(5, 1),
 				BUILDCRAFTBUILDERS(5, 1),
 				BUILDCRAFTENERGY(5, 1),
@@ -132,19 +198,19 @@ public class Shop {
 				TUBESTUFF(4, 1),
 				ADDITIONALPIPES(4, 0),
 				QMUNITYLIB(4, 1),
-				BLUEPOWER(2, 1),
+				BLUEPOWER(1, 1),
 				CHICKENCHUNKS(9, 1),
 				ENDERSTORAGE(4, 1),
-				ENG_TOOLBOX(4, 1),
+				ENG_TOOLBOX(2, 1),
 				IC2NUCLEARCONTROL(5, 1),
 				POWERSUITS(7, 3),
 				OCS(4, 1),
 				POWERCONVERTERS3(4, 1),
 				ZETTAINDUSTRIES(3, 1),
-				LOGISTICSPIPES(5, 1),
-				BUILDCRAFTCOMPAT(5, 1),
+				LOGISTICSPIPES(2, 1),
+				BUILDCRAFTCOMPAT(2, 1),
 				FORGEMICROBLOCK(1, 1),
-				AOBD(3, 1),
+				AOBD(1, 1),
 				UNKNOWN(4, 1);
 				public final int value, sell;
 				private Value(int value, int sell) {
@@ -170,8 +236,10 @@ public class Shop {
 		}
 		
 		private static ArrayList<Catagory> catagory;
+		private static ArrayList<ShopItem> itemsForSale = new ArrayList<>();
 		public Store() {
 			catagory = new ArrayList<>();
+			itemsForSale = new ArrayList<>();
 			init();
 		}
 		private Catagory findCatagory(String name) {
@@ -180,8 +248,14 @@ public class Shop {
 					return c;
 			return null;
 		}
+		public static ShopItem getShopItem(String itemName) {
+			for(ShopItem i : itemsForSale) 
+				if(i.materialName.equals(itemName))
+					return i;
+			return null;
+		}
 		
-		public static CommandDocumentation catalog = new CommandDocumentation("Catalog");
+		public static CommandDocumentation catalog = new CommandDocumentation("TeknetCore Shop Catalog");
 		private void init() {
 			ArrayList<String[]> lines = FileUtilities.readDataFileLines(PATH_TO_SHOP_DATA);
 			Catagory cat = new Catagory("MINECRAFT");
@@ -209,19 +283,19 @@ public class Shop {
 							case "COAL": tag = "[COAL]"; break;
 						}
 						if(tag.equals("")) tag = "[ITEM]";
-						if(mat.name().equals("ENCHANTMENT_TABLE") || mat.name().equals("BEDROCK") || mat.name().equals("TNT")) tag = "[DIAMOND]";
-						
+						if(mat.name().equals("ENCHANTMENT_TABLE") 
+								|| mat.name().equals("BEDROCK") || mat.name().equals("TNT")) tag = "[DIAMOND]";
 						int value = 0, sell = 0;
 						switch(tag) {
 							case "[BLOCK]": value = 1; sell = 0; break;
 							case "[ITEM]": value = 1; sell = 0; break;
-							case "[DIAMOND]": value = 4; sell = 1; break;
-							case "[REDSTONE]": value = 3; sell = 1; break;
+							case "[DIAMOND]": value = 3; sell = 2; break;
+							case "[REDSTONE]": value = 1; sell = 0; break;
 							case "[IRON]": value = 2; sell = 1; break;
-							case "[GOLD]": value = 3; sell = 1; break;
+							case "[GOLD]": value = 3; sell = 2; break;
 							case "[COAL]": value = 2; sell = 1; break;
 						}
-						switch(tag) {
+						switch(type) {
 							case "BLOCK": value++; sell++; break;
 							case "SWORD": value++; break;
 							case "PICKAXE": value++; break;
@@ -233,39 +307,50 @@ public class Shop {
 							case "LEGGINGS": value++; break;
 							case "BOOTS": value++; break;
 						}
-						if(mat.name().equals("MOB_SPAWNER")) value = 8; sell = 1;
+						if(mat.name().equals("MOB_SPAWNER")) {
+							value = 8; sell = 1;
+						}
 						cat.items.add(new ShopItem(line[0], cat, Bank.returnRandomCurrencyOfValue(value, 75.0f), 
-								Bank.returnRandomCurrencyOfValue(sell, 5.0f)));
+								Bank.returnRandomCurrencyOfValue(sell, 30.0f)));
 					} else {
 						// Modded items.
-						cat.items.add(new ShopItem(line[0], cat, Bank.returnRandomCurrencyOfValue(cat.value.value + 1, 250.0f), 
-							Bank.returnRandomCurrencyOfValue(cat.value.value - 2, 200.0f)));
+						String[] tok = line[0].split("_");
+						int value = cat.value.value + 1;
+						for(String s : tok) {
+							if(s.equals("COPPER") || s.equals("CABLE") 
+									|| s.equals("WIRE") || s.equals("GEAR")) value = 1;
+							if(s.equals("DIAMOND")) value = 3;
+						}
+						cat.items.add(new ShopItem(line[0], cat, Bank.returnRandomCurrencyOfValue(value, 250.0f), 
+							Bank.returnRandomCurrencyOfValue(value - 1, 200.0f)));
 					}
 				}
 			}
-			ArrayList<String> itemsForSale = new ArrayList<>();
-			
 			for(Catagory c : catagory) {
 				for(ShopItem s : c.items) {
-					String[] tok = s.materialName.split("_");
-					String name = "";
-					if(tok.length >= 2) {
-						for(int i = 1; i < tok.length; i++)
-							name += tok[i];
-						name = name.replace('_', ' ');
-					} else name = s.materialName.replace('_', ' ');
-					itemsForSale.add(name + ChatColor.GRAY + ", Buy: " + s.price.printValueColored() + ChatColor.GRAY + " Sell: " + s.sellValue.printValueColored());
+					itemsForSale.add(s);
 				}
 			}
-			Collections.sort(itemsForSale);
 			boolean toggle = true;
-			int pages = (int)(itemsForSale.size() / 9) + 1,
+			int pages = (int)((itemsForSale.size() * 2) / 8) + 1,
 					item = 0;
+			catalog.editPage(0).write(ChatColor.GOLD + "►►► Welcome to the TeknetCore Shop Catalog! ◄◄◄" + ChatColor.RESET, 0);
+			catalog.editPage(0).write(" ► Use [shop-buy] or [shop-sell] to begin shopping!", 1);
+			catalog.editPage(0).write(" ► To find a specific item, use the search feature!", 2);
+			catalog.editPage(0).write(" ► " + ChatColor.GRAY + " Ex. [shop-catalog-diamond] " + ChatColor.GRAY + "will find all pages with", 3);
+			catalog.editPage(0).write(ChatColor.GRAY + " the word or phrase " + ChatColor.GOLD + "\"DIAMOND\"" + ChatColor.GRAY + "...", 4);
+			catalog.editPage(0).write(ChatColor.GRAY + " Then, simply use [shop-catalog-<page>] " + ChatColor.GRAY + "specifying one of the", 5);
+			catalog.editPage(0).write(ChatColor.GRAY + " page numbers listed to find your desired buy and sell prices!", 6);
+			catalog.editPage(0).write(ChatColor.RED + " Please do not use spaces or special characters in search!", 7);
+			catalog.editPage(0).write("------- Search for an item! [shop-catalog-<item-name>] -------", 8);
 			outter: for(int i = 1; i <= pages; i++) {
 				catalog.addPage(new Page());
-				for(int ii = 0; ii < 9; ii++) {
+				for(int ii = 0; ii < 8; ii += 2) {
 					if(item >= itemsForSale.size()) break outter;
-					catalog.editPage(i - 1).write(((toggle) ? ChatColor.BLUE : ChatColor.DARK_AQUA) + itemsForSale.get(item), ii);
+					catalog.editPage(i).write(ChatColor.WHITE + " ► " + ((toggle) ? ChatColor.BLUE : ChatColor.DARK_AQUA) 
+							+ itemsForSale.get(item).materialName.replace("_", " "), ii);
+					catalog.editPage(i).write(ChatColor.GOLD + "    Buy: " + itemsForSale.get(item).price.printValueColored() 
+							+ ChatColor.GOLD + ", Sell: " + itemsForSale.get(item).sellValue.printValueColored(), ii + 1);
 					toggle = !toggle;
 					item++;
 				}
@@ -278,6 +363,7 @@ public class Shop {
 	}
 	
 	public static ArrayList<ShopSession> SHOP_SESSION_STATE;
+	@SuppressWarnings("unused")
 	private static Store STORE;
 	
 	public Shop() {
@@ -292,10 +378,53 @@ public class Shop {
 	public static void startShopSession(Player player) {
 		ShopSession s = getShopSessionOf(player);
 		if(s != null) {
-			ChatUtilities.logTo(player, "You're already in a shop session!", ChatUtilities.LogType.FATAL);
+			ChatUtilities.logTo(player, "You're already in a shop session! Use [shop-checkout] to end it!", ChatUtilities.LogType.FATAL);
 			return;
 		}
 		SHOP_SESSION_STATE.add(new ShopSession(player));
+		ChatUtilities.logTo(player, "Shop session started!", ChatUtilities.LogType.SUCCESS);
+	}
+	
+	public static void stopShopSession(Player player) {
+		ShopSession s = getShopSessionOf(player);
+		if(s == null) {
+			ChatUtilities.logTo(player, "You're not in an active shop session! Use [shop-buy] or [shop-sell] to begin!", ChatUtilities.LogType.FATAL);
+			return;
+		}
+		// Checkout function here...
+		player.getInventory().setContents(s.survivalInventory);
+		player.getInventory().setArmorContents(s.survivalArmor);
+		player.setGameMode(GameMode.SURVIVAL);
+		SHOP_SESSION_STATE.remove(s);
+		ChatUtilities.logTo(player, "Shop checkout complete. Thank you for your patronage!", ChatUtilities.LogType.SUCCESS);
+	}
+	
+	public static Bank.Currency getCurrentShopSessionSubtotal(Player player, boolean verbose) {
+		ShopSession s = getShopSessionOf(player);
+		if(s == null) {
+			ChatUtilities.logTo(player, "You are not currently in a buy session!\nUse [shop-buy] to begin one.", 
+					ChatUtilities.LogType.FATAL);
+			return null;
+		}
+		ItemStack[] stack = player.getInventory().getContents();
+		Currency subtotal = new Currency(0);
+		for(ItemStack ss : stack) {
+			try {
+				Material mat = ss.getType();
+				ShopItem item = Store.getShopItem(mat.name());
+				if(item == null) continue;
+				int amount = ss.getAmount();
+				Currency full = Bank.multiply(item.price, amount);
+				ChatUtilities.messageTo(player, "Item: " + mat.name() + 
+						" is " + item.price.printValueColored() + ChatColor.GRAY + " x " + ChatColor.GOLD + amount + 
+						ChatColor.GOLD + " = " + full.printValueColored(), 
+						ChatColor.GRAY);
+				subtotal = Bank.add(subtotal, full);
+			} catch (Exception e) { continue; }
+		}
+		if(verbose) ChatUtilities.messageTo(player, ChatColor.DARK_GREEN + "Current subtotal: " + subtotal.printValueColored(),
+				ChatColor.GRAY);
+		return subtotal;
 	}
 	 
 	public static ShopSession getShopSessionOf(Player player) {

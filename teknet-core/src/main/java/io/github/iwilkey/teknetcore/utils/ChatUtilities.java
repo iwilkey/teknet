@@ -17,7 +17,7 @@ public class ChatUtilities {
 			}
 			public void write(String content, int line) {
 				if(line >= 9) return;
-				if(content.length() >= 75) content = content.substring(0, 75);
+				// if(content.length() >= 75) content = content.substring(0, 75);
 				lines[line] = highlightCommands(content, ChatColor.WHITE);
 			}
 			public void renderTo(Player player) {
@@ -63,14 +63,15 @@ public class ChatUtilities {
 			messageTo(player, "------- " + name + ": Index (" + (page + 1) + "/" + pages.size() + ") -------", ChatColor.WHITE);
 			pages.get(page).renderTo(player);
 		}
-		public int searchFor(String word) {
+		public ArrayList<Integer> searchFor(String word) {
+			ArrayList<Integer> found = new ArrayList<>();
 			int pp = 0;
 			for(Page p : pages) {
 				if(p.searchFor(word))
-					return pp;
+					found.add(pp);
 				pp++;
 			}
-			return -1;
+			return found;
 		}
 	}
 	

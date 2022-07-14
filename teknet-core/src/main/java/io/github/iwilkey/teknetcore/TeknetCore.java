@@ -6,6 +6,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
+import io.github.iwilkey.teknetcore.economy.Bank;
 import io.github.iwilkey.teknetcore.economy.Shop;
 import io.github.iwilkey.teknetcore.eventlistener.ServerEventListener;
 import io.github.iwilkey.teknetcore.location.Locations;
@@ -52,6 +53,7 @@ public final class TeknetCore extends JavaPlugin {
         new SoundUtilities();
         new Ranks();
         new Locations();
+        new Bank();
         new Shop();
 	}
 	
@@ -66,6 +68,7 @@ public final class TeknetCore extends JavaPlugin {
 		getCommand("position").setExecutor(new Locations.Positions.PositionCommand(Rank.HOBBYIST));
 		
 		// Economy
+		getCommand("bank").setExecutor(new Bank.BankCommand(Rank.HOBBYIST));
 		getCommand("shop").setExecutor(new Shop.ShopCommand(Rank.HOBBYIST));
 		
 		// Admin utilities

@@ -1,9 +1,16 @@
 package io.github.iwilkey.teknetcore.economy;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.entity.Player;
 
+import io.github.iwilkey.teknetcore.TeknetCoreCommand;
+import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
+import io.github.iwilkey.teknetcore.utils.ChatUtilities;
+import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.MathUtilities;
 
 public class Bank {
@@ -14,6 +21,10 @@ public class Bank {
 		
 		public Currency(BigInteger amount) {
 			this.amount = amount;
+		}
+		
+		public Currency(long amount) {
+			this.amount = BigInteger.valueOf(amount);
 		}
 		
 		public BigInteger getDollars() {
@@ -75,4 +86,116 @@ public class Bank {
 		return new Currency(one.get().subtract(two.get()));
 	}
 	
+	public static Currency multiply(Currency one, long scalar) {
+		return new Currency(one.get().multiply(BigInteger.valueOf(scalar)));
+	}
+	
+	// TeknetTrust...
+	
+	private static ArrayList<Account> TEKNET_TRUST_STATE;
+	
+	public static class BankCommand extends TeknetCoreCommand {
+
+		public BankCommand(Rank permissions) {
+			super("bank", permissions);
+			
+			Function seeAccount = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					Account a = null;
+					if(args.length == 1) {
+						a = getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+					}
+					else {
+						String search = "";
+						for(int i = 1; i < args.length; i++) {
+							search += args[i].toUpperCase();
+							if(i != args.length - 1) search += " ";
+						}
+						a = getPlayerTeknetTrustAccount(search, sender);
+					}
+					a.add(sender, new Currency(1000000));
+					a.printStatus(sender);
+				};
+				
+			};
+			
+			registerFunction("account", seeAccount);
+		}
+
+		@Override
+		protected void documentation(CommandDocumentation doc) {
+			
+		}
+
+		@Override
+		public boolean logic(Player sender, Command command, String label, String[] args) {
+			return true;
+		}
+		
+	}
+	
+	public Bank() {
+		TEKNET_TRUST_STATE = new ArrayList<>();
+	}
+	
+	public static class Account {
+		public String name,
+			playerName;
+		public Currency amount;
+		public Account(String name, String playerName) {
+			this.playerName = playerName;
+			this.name = name;
+			amount = new Currency(0L);
+		}
+		public void printStatus(Player player) {
+			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
+					" ► " + ChatColor.GOLD + name + ": " + amount.printValueColored(),
+					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GRAY);
+		}
+		
+		public boolean add(Player player, Currency second) {
+			amount = Bank.add(amount, second);
+			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
+					"" + ChatColor.GREEN + " +$ " + ChatColor.GOLD + "" 
+			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
+					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GOLD);
+			return true;
+		}
+		
+		public boolean subtract(Player player, Currency second) {
+			Currency buffer = Bank.subtract(amount, second);
+			if(buffer.get().compareTo(BigInteger.valueOf(0)) < 0) return false;
+			amount = buffer;
+			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
+					"" + ChatColor.DARK_RED + " -$ " + ChatColor.GOLD + "" 
+			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
+					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GOLD);
+			return true;
+		}
+		
+	}
+	
+	public static Account createPlayerTeknetTrustAccount(String name, Player player) {
+		if(accountExists(name, player)) {
+			ChatUtilities.logTo(player, "You already own an account by this name!", ChatUtilities.LogType.FATAL);
+			return null;
+		}
+		TEKNET_TRUST_STATE.add(new Account(name, player.getName()));
+		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
+	}
+	
+	public static Account getPlayerTeknetTrustAccount(String name, Player player) {
+		for(Account a : TEKNET_TRUST_STATE) 
+			if(a.name.equals(name) && a.playerName.equals(player.getName()))
+				return a;
+		return createPlayerTeknetTrustAccount(name, player);
+	}
+	
+	private static boolean accountExists(String name, Player player) {
+		for(Account a : TEKNET_TRUST_STATE) 
+			if(a.name.equals(name) && a.playerName.equals(player.getName()))
+				return true;
+		return false;
+	}
 }

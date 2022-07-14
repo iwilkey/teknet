@@ -31,12 +31,14 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 	}
 	protected static class CommandFunction {
 		public String command;
+		public String[] alternateCommands;
 		public Function function;
 		int subArgs;
-		public CommandFunction(String name, Function function, int subArgs) {
+		public CommandFunction(String name, Function function, int subArgs, String... alt) {
 			this.command = name;
 			this.subArgs = subArgs;
 			this.function = function;
+			this.alternateCommands = alt;
 		}
 	}
 	protected ArrayList<CommandFunction> registeredFunctions;
@@ -51,8 +53,11 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 		documentation(doc);
 		registeredFunctions = new ArrayList<>();
 	}
-	protected void registerFunction(String name, Function function, int subArgs) {
-		registeredFunctions.add(new CommandFunction(name, function, subArgs));
+	protected void registerFunction(String name, Function function, int subArgs, String... alt) {
+		registeredFunctions.add(new CommandFunction(name, function, subArgs, alt));
+	}
+	protected void registerFunction(String name, Function function, String... alt) {
+		registeredFunctions.add(new CommandFunction(name, function, -1, alt));
 	}
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -81,15 +86,28 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 	protected abstract void documentation(CommandDocumentation doc);
 	protected boolean invoke(Player sender, Command command, String label, String[] args) {
 		if(registeredFunctions.size() != 0 && args.length != 0) {
-			for(CommandFunction f : registeredFunctions) 
+			for(CommandFunction f : registeredFunctions) {
 				if(f.command.equals(args[0])) {
-					if(args.length != f.subArgs + 1) {
-						throwError(sender, CommandError.INVALID_SYNTAX);
-						return true;
-					}
+					if(f.subArgs != -1)
+						if(args.length != f.subArgs + 1) {
+							throwError(sender, CommandError.INVALID_SYNTAX);
+							return true;
+						}
 					f.function.func(sender, args);
 					return true;
 				}
+				for(String s : f.alternateCommands) {
+					if(s.equals(args[0])) {
+						if(f.subArgs != -1)
+							if(args.length != f.subArgs + 1) {
+								throwError(sender, CommandError.INVALID_SYNTAX);
+								return true;
+							}
+						f.function.func(sender, args);
+						return true;
+					}
+				}
+			}
 			throwError((Player)sender, CommandError.NO_SUCH_COMMAND);
 			return true;
 		} else if(registeredFunctions.size() != 0 && args.length == 0) {

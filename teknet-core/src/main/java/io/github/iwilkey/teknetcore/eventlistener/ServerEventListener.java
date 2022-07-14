@@ -2,6 +2,7 @@ package io.github.iwilkey.teknetcore.eventlistener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -9,7 +10,11 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
@@ -36,6 +41,7 @@ public class ServerEventListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	public static void onPlayerCommandRequest(PlayerCommandPreprocessEvent e) {
+		if(e.getMessage().substring(0, 5).equals("/stop")) return;
 		e.setMessage(e.getMessage().toLowerCase());
 		if(e.getMessage().equals("/help") || e.getMessage().equals("/teknetcore help")) {
 			TeknetCore.printAllHelp(e.getPlayer());
@@ -52,12 +58,19 @@ public class ServerEventListener implements Listener {
 		}
 	}
 	
+	// Shop related events.
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerMove(PlayerMoveEvent e) {
 		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
-			ChatUtilities.messageTo(e.getPlayer(), "You cannot move during while shopping! Done? [shop-checkout]", ChatColor.GRAY);
-			e.getPlayer().teleport(s.startedAt);
+			if(e.getPlayer().getLocation().getX() != s.startedAt.getX() ||
+					e.getPlayer().getLocation().getY() != s.startedAt.getY() ||
+					e.getPlayer().getLocation().getZ() != s.startedAt.getZ()) {
+				e.getPlayer().teleport(s.startedAt);
+				ChatUtilities.messageTo(e.getPlayer(), 
+						"You cannot move during while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
+			}
 		}
 	}
 	
@@ -65,7 +78,7 @@ public class ServerEventListener implements Listener {
 	public static void onPlayerItemDrop(PlayerDropItemEvent e) {
 		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
-			ChatUtilities.messageTo(e.getPlayer(), "You cannot drop items while shopping! Done? [shop-checkout]", ChatColor.GRAY);
+			ChatUtilities.messageTo(e.getPlayer(), "You cannot drop items while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
 		}
 	}
@@ -74,9 +87,36 @@ public class ServerEventListener implements Listener {
 	public static void onPlayerInteraction(PlayerInteractEvent e) {
 		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
-			ChatUtilities.messageTo(e.getPlayer(), "You cannot interact with anything while shopping! Done? [shop-checkout]", ChatColor.GRAY);
+			ChatUtilities.messageTo(e.getPlayer(), "You cannot interact with anything while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
 		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerLogin(PlayerLoginEvent e) {
+		e.getPlayer().setGameMode(GameMode.SURVIVAL);
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) Shop.stopShopSession(e.getPlayer());
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerJoin(PlayerJoinEvent e) {
+		e.getPlayer().setGameMode(GameMode.SURVIVAL);
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) Shop.stopShopSession(e.getPlayer());
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerKick(PlayerKickEvent e) {
+		e.getPlayer().setGameMode(GameMode.SURVIVAL);
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) Shop.stopShopSession(e.getPlayer());
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPlayerLeave(PlayerQuitEvent e) {
+		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 }

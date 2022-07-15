@@ -77,6 +77,7 @@ public class Shop {
 					Bank.Currency total = getCurrentShopSessionSubtotal(sender, false);
 					if(total == null) return;
 					Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+					if(a == null) a = Bank.createPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
 					ChatUtilities.messageTo(sender, 
 							"+ Account chosen: " + a.name + " -> " + a.amount.printValueColored(), 
 							ChatColor.GRAY);

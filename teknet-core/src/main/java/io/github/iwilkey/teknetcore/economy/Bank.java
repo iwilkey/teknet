@@ -3,15 +3,20 @@ package io.github.iwilkey.teknetcore.economy;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 import io.github.iwilkey.teknetcore.TeknetCoreCommand;
+import io.github.iwilkey.teknetcore.location.Locations.Home.HomeData;
 import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
+import io.github.iwilkey.teknetcore.utils.FileUtilities;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.MathUtilities;
+import io.github.iwilkey.teknetcore.utils.PlayerUtilities;
 
 public class Bank {
 	
@@ -105,6 +110,7 @@ public class Bank {
 					Account a = null;
 					if(args.length == 1) {
 						a = getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+						if(a == null) a = createPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
 					}
 					else {
 						String search = "";
@@ -113,8 +119,11 @@ public class Bank {
 							if(i != args.length - 1) search += " ";
 						}
 						a = getPlayerTeknetTrustAccount(search, sender);
+						if(a == null) {
+							ChatUtilities.logTo(sender, "You do not have an account registered under this name.", ChatUtilities.LogType.FATAL);
+							return;
+						}
 					}
-					a.add(sender, new Currency(1000000));
 					a.printStatus(sender);
 				};
 				
@@ -137,6 +146,7 @@ public class Bank {
 	
 	public Bank() {
 		TEKNET_TRUST_STATE = new ArrayList<>();
+		translateRegister();
 	}
 	
 	public static class Account {
@@ -157,9 +167,10 @@ public class Bank {
 		public boolean add(Player player, Currency second) {
 			amount = Bank.add(amount, second);
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
-					"" + ChatColor.GREEN + " +$ " + ChatColor.GOLD + "" 
+					"" + ChatColor.GREEN + " +$ -> " + ChatColor.GOLD + "" 
 			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
 					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GOLD);
+			writeRegister();
 			return true;
 		}
 		
@@ -168,9 +179,10 @@ public class Bank {
 			if(buffer.get().compareTo(BigInteger.valueOf(0)) < 0) return false;
 			amount = buffer;
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
-					"" + ChatColor.DARK_RED + " -$ " + ChatColor.GOLD + "" 
+					"" + ChatColor.DARK_RED + " -$ <- " + ChatColor.GOLD + "" 
 			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
 					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GOLD);
+			writeRegister();
 			return true;
 		}
 		
@@ -182,6 +194,17 @@ public class Bank {
 			return null;
 		}
 		TEKNET_TRUST_STATE.add(new Account(name, player.getName()));
+		writeRegister();
+		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
+	}
+	
+	public static Account createPlayerTeknetTrustAccount(String name, String playerName) {
+		if(accountExists(name, playerName)) {
+			ChatUtilities.logTo(PlayerUtilities.get(playerName), "You already own an account by this name!", ChatUtilities.LogType.FATAL);
+			return null;
+		}
+		TEKNET_TRUST_STATE.add(new Account(name, playerName));
+		writeRegister();
 		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
 	}
 	
@@ -189,7 +212,7 @@ public class Bank {
 		for(Account a : TEKNET_TRUST_STATE) 
 			if(a.name.equals(name) && a.playerName.equals(player.getName()))
 				return a;
-		return createPlayerTeknetTrustAccount(name, player);
+		return null;
 	}
 	
 	private static boolean accountExists(String name, Player player) {
@@ -197,5 +220,37 @@ public class Bank {
 			if(a.name.equals(name) && a.playerName.equals(player.getName()))
 				return true;
 		return false;
+	}
+	
+	private static boolean accountExists(String name, String playerName) {
+		for(Account a : TEKNET_TRUST_STATE) 
+			if(a.name.equals(name) && a.playerName.equals(playerName))
+				return true;
+		return false;
+	}
+	
+	private static void translateRegister() {
+		if(!FileUtilities.fileExists("trust")) FileUtilities.createDataFile("trust");
+		TEKNET_TRUST_STATE.clear();
+		ArrayList<String[]> data = FileUtilities.readDataFileLines("trust");
+		for(String[] lineDat : data) {
+			String name = "";
+			for(int i = 2; i < lineDat.length; i++) {
+				name += lineDat[i];
+				if(i != lineDat.length - 1) 
+					name += " ";
+			}
+			Account a = createPlayerTeknetTrustAccount(name, lineDat[0]);
+			a.amount.amount = new BigInteger(lineDat[1], 10);
+			TEKNET_TRUST_STATE.add(a);
+		}
+	}
+	
+	private static void writeRegister() {
+		FileUtilities.clearDataFile("trust");
+		for(Account a : TEKNET_TRUST_STATE) {
+			String data = a.playerName + " " + a.amount.get().toString() + " " + a.name;
+			FileUtilities.appendDataEntryTo("trust", data);
+		}
 	}
 }

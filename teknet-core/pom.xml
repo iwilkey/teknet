@@ -4,6 +4,9 @@
   <artifactId>TeknetCore</artifactId>
   <name>TeknetCore</name>
   <version>LATEST</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
   <build>
       <plugins>
           <plugin>

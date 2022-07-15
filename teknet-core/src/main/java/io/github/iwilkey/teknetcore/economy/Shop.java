@@ -44,6 +44,7 @@ public class Shop {
 										"TeknetCore could not find your catalog search inquiry! "
 										+ ChatColor.GOLD + "Please check spelling and make sure your inquiry has no spaces or special characters.", ChatUtilities.LogType.FATAL);
 							} else {
+								ChatUtilities.messageTo(sender, "----------------------------------------------------", ChatColor.GRAY);
 								ChatUtilities.logTo(sender, 
 										"Found " + pp.size() + " result(s) for inquiry\n" + 
 												ChatColor.GOLD + args[1].toUpperCase() + ChatColor.GRAY + 
@@ -58,35 +59,49 @@ public class Shop {
 									ps++;
 								}
 								ChatUtilities.messageTo(sender, results, ChatColor.GRAY);
+								ChatUtilities.messageTo(sender, "----------------------------------------------------", ChatColor.GRAY);
 							}
 						}
 					}
 				}
 			};
 			
-			Function startSession = new Function() {
+			Function startBuySession = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
 					startShopSession(sender);
 				}
 			};
 			
+			Function sell = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					// /shop sell this
+					// /shop sell all
+				}
+			};
+			
 			Function endSession = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
+					ShopBuySession s = getShopSessionOf(sender);
+					if(s == null) {
+						ChatUtilities.logTo(sender, "You're not in an active shop session! Use [shop-buy] or [shop-sell] to begin!", ChatUtilities.LogType.FATAL);
+						return;
+					}
 					Bank.Currency total = getCurrentShopSessionSubtotal(sender, false);
 					if(total == null) return;
 					Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
 					if(a == null) a = Bank.createPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
 					ChatUtilities.messageTo(sender, 
-							"+ Account chosen: " + a.name + " -> " + a.amount.printValueColored(), 
+							" ► Account chosen: " + a.name + " = " + a.amount.printValueColored(), 
 							ChatColor.GRAY);
 					ChatUtilities.messageTo(sender, 
-							"- Total due: " + total.printValueColored(), 
+							" ► Total due = " + total.printValueColored(), 
 							ChatColor.GRAY);
 					if(!a.subtract(sender, total)) {
 						ChatUtilities.messageTo(sender, 
-								"Payment declined! Please try a different method of payment or [shop-quit]", 
+								" ► Payment declined! Please try a different method of payment or [shop-quit]", 
 								ChatColor.DARK_RED);
 						return;
 					} else {
@@ -112,21 +127,47 @@ public class Shop {
 			Function quit = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
-					sender.getInventory().clear();
-					stopShopSession(sender);
+					if(stopShopSession(sender)) 
+						sender.getInventory().clear();
+				}
+			};
+			
+			Function value = new Function() {
+				@Override
+				public void func(Player sender, String[] args) {
+					// Value of item selected.
 				}
 			};
 			
 			registerFunction("catalog", prices, "search", "items");
-			registerFunction("buy", startSession, 0, "b");
-			registerFunction("checkout", endSession, 0, "c");
-			registerFunction("subtotal", subtotal, 0, "sub", "s");
-			registerFunction("quit", quit, 0, "q");
+			registerFunction("buy", startBuySession, 0, "b", "start");
+			registerFunction("sell", sell, 1);
+			registerFunction("checkout", endSession, 0);
+			registerFunction("subtotal", subtotal, 0, "sub", "tot", "s");
+			registerFunction("quit", quit, 0, "q", "exit", "stop");
+			registerFunction("value", value, 0, "p", "price");
 		}
 
 		@Override
 		protected void documentation(CommandDocumentation doc) {
-			
+			doc.editPage(0).write(ChatColor.GOLD + "The TeknetCore Shop is a tool for procuring and selling" + ChatColor.RESET, 1);
+			doc.editPage(0).write(ChatColor.GOLD + "    every single item available in game." + ChatColor.RESET, 2);
+			doc.editPage(0).write("Use [shop-catalog] to search any item's buy / sell values.", 3);
+			doc.editPage(0).write("Use [shop-buy] to begin a shop buy session.", 4);
+			doc.editPage(0).write("Use [shop-subtotal] to see the current amount owed.", 5);
+			doc.editPage(0).write("Use [shop-checkout] to purchase the items selected.", 6);
+			doc.editPage(0).write("Use [shop-quit] to exit the session without paying.", 7);
+			doc.editPage(0).write(ChatColor.GRAY + "------- Next page for more commands... -------" + ChatColor.RESET, 8);
+			doc.addPage(new Page());
+			doc.editPage(1).write("Use [shop-sell-all] to sell all items in inventory.", 0);
+			doc.editPage(1).write("Use [shop-sell-this] to sell the selected item in hotbar.", 1);
+			doc.editPage(1).write("Use [shop-value] to see the value of the selected item.", 2);
+			doc.editPage(1).write("[shop-subtotal] alternatives: [shop-sub] [shop-tot] [shop-s]", 3);
+			doc.editPage(1).write("[shop-quit] alternatives: [shop-q] [shop-exit] [shop-stop]", 4);
+			doc.editPage(1).write("[shop-buy] alternatives: [shop-b] [shop-start]", 5);
+			doc.editPage(1).write("[shop-catalog] alternatives: [shop-search] [shop-items]", 6);
+			doc.editPage(1).write("[shop-value] alternatives: [shop-p] [shop-price]", 7);
+			doc.editPage(1).write(ChatColor.GRAY + "------- End of TeknetCore Manual -------" + ChatColor.RESET, 8);
 		}
 
 		@Override
@@ -136,13 +177,13 @@ public class Shop {
 		
 	}
 	
-	public static class ShopSession {
+	public static class ShopBuySession {
 		public String playerName;
 		public Location startedAt;
 		public Inventory shopBasket;
 		public ItemStack[] survivalInventory,
 			survivalArmor;
-		public ShopSession(Player player) {
+		public ShopBuySession(Player player) {
 			this.playerName = player.getName();
 			startedAt = player.getLocation();
 			survivalInventory = player.getInventory().getContents();
@@ -335,7 +376,7 @@ public class Shop {
 			boolean toggle = true;
 			int pages = (int)((itemsForSale.size() * 2) / 8) + 1,
 					item = 0;
-			catalog.editPage(0).write(ChatColor.GOLD + "►►► Welcome to the TeknetCore Shop Catalog! ◄◄◄" + ChatColor.RESET, 0);
+			catalog.editPage(0).write(ChatColor.GOLD + " ►►► Welcome to the TeknetCore Shop Catalog! ◄◄◄" + ChatColor.RESET, 0);
 			catalog.editPage(0).write(" ► Use [shop-buy] or [shop-sell] to begin shopping!", 1);
 			catalog.editPage(0).write(" ► To find a specific item, use the search feature!", 2);
 			catalog.editPage(0).write(" ► " + ChatColor.GRAY + " Ex. [shop-catalog-diamond] " + ChatColor.GRAY + "will find all pages with", 3);
@@ -343,7 +384,7 @@ public class Shop {
 			catalog.editPage(0).write(ChatColor.GRAY + " Then, simply use [shop-catalog-<page>] " + ChatColor.GRAY + "specifying one of the", 5);
 			catalog.editPage(0).write(ChatColor.GRAY + " page numbers listed to find your desired buy and sell prices!", 6);
 			catalog.editPage(0).write(ChatColor.RED + " Please do not use spaces or special characters in search!", 7);
-			catalog.editPage(0).write("------- Search for an item! [shop-catalog-<item-name>] -------", 8);
+			catalog.editPage(0).write("------ Search for an item! [shop-catalog-<item-name>] ------", 8);
 			outter: for(int i = 1; i <= pages; i++) {
 				catalog.addPage(new Page());
 				for(int ii = 0; ii < 8; ii += 2) {
@@ -355,6 +396,7 @@ public class Shop {
 					toggle = !toggle;
 					item++;
 				}
+				catalog.editPage(i).write("----------------------------------------------------", 8);
 			}
 		}
 
@@ -363,7 +405,7 @@ public class Shop {
 		}
 	}
 	
-	public static ArrayList<ShopSession> SHOP_SESSION_STATE;
+	public static ArrayList<ShopBuySession> SHOP_SESSION_STATE;
 	@SuppressWarnings("unused")
 	private static Store STORE;
 	
@@ -376,21 +418,22 @@ public class Shop {
 		
 	}
 	
-	public static void startShopSession(Player player) {
-		ShopSession s = getShopSessionOf(player);
+	public static boolean startShopSession(Player player) {
+		ShopBuySession s = getShopSessionOf(player);
 		if(s != null) {
 			ChatUtilities.logTo(player, "You're already in a shop session! Use [shop-checkout] to end it!", ChatUtilities.LogType.FATAL);
-			return;
+			return false;
 		}
-		SHOP_SESSION_STATE.add(new ShopSession(player));
+		SHOP_SESSION_STATE.add(new ShopBuySession(player));
 		ChatUtilities.logTo(player, "Shop session started!", ChatUtilities.LogType.SUCCESS);
+		return true;
 	}
 	
-	public static void stopShopSession(Player player) {
-		ShopSession s = getShopSessionOf(player);
+	public static boolean stopShopSession(Player player) {
+		ShopBuySession s = getShopSessionOf(player);
 		if(s == null) {
-			ChatUtilities.logTo(player, "You're not in an active shop session! Use [shop-buy] or [shop-sell] to begin!", ChatUtilities.LogType.FATAL);
-			return;
+			ChatUtilities.logTo(player, "You're not in an active shop session! Use [shop-buy] to begin!", ChatUtilities.LogType.FATAL);
+			return false;
 		}
 		// Checkout function here...
 		player.getInventory().setContents(s.survivalInventory);
@@ -398,12 +441,13 @@ public class Shop {
 		player.setGameMode(GameMode.SURVIVAL);
 		SHOP_SESSION_STATE.remove(s);
 		ChatUtilities.logTo(player, "Shop checkout complete. Thank you for your patronage!", ChatUtilities.LogType.SUCCESS);
+		return true;
 	}
 	
 	public static Bank.Currency getCurrentShopSessionSubtotal(Player player, boolean verbose) {
-		ShopSession s = getShopSessionOf(player);
+		ShopBuySession s = getShopSessionOf(player);
 		if(s == null) {
-			ChatUtilities.logTo(player, "You are not currently in a buy session!\nUse [shop-buy] to begin one.", 
+			ChatUtilities.logTo(player, "You are not currently in a buy session! Use [shop-buy] to begin one.", 
 					ChatUtilities.LogType.FATAL);
 			return null;
 		}
@@ -428,8 +472,8 @@ public class Shop {
 		return subtotal;
 	}
 	 
-	public static ShopSession getShopSessionOf(Player player) {
-		for(ShopSession s : SHOP_SESSION_STATE) 
+	public static ShopBuySession getShopSessionOf(Player player) {
+		for(ShopBuySession s : SHOP_SESSION_STATE) 
 			if(s.playerName.equals(player.getName()))
 				return s;
 		return null;

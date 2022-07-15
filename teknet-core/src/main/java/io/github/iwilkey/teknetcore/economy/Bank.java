@@ -160,7 +160,7 @@ public class Bank {
 		}
 		public void printStatus(Player player) {
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
-					" ► " + ChatColor.GOLD + name + ": " + amount.printValueColored(),
+					"► " + ChatColor.GOLD + name + ": " + amount.printValueColored(),
 					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GRAY);
 		}
 		
@@ -208,6 +208,18 @@ public class Bank {
 		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
 	}
 	
+	public static Account createPlayerTeknetTrustAccount(String name, String playerName, Currency startFunds) {
+		if(accountExists(name, playerName)) {
+			ChatUtilities.logTo(PlayerUtilities.get(playerName), "You already own an account by this name!", ChatUtilities.LogType.FATAL);
+			return null;
+		}
+		TEKNET_TRUST_STATE.add(new Account(name, playerName));
+		Account a = TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
+		a.amount = startFunds;
+		writeRegister();
+		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
+	}
+	
 	public static Account getPlayerTeknetTrustAccount(String name, Player player) {
 		for(Account a : TEKNET_TRUST_STATE) 
 			if(a.name.equals(name) && a.playerName.equals(player.getName()))
@@ -240,8 +252,7 @@ public class Bank {
 				if(i != lineDat.length - 1) 
 					name += " ";
 			}
-			Account a = createPlayerTeknetTrustAccount(name, lineDat[0]);
-			a.amount.amount = new BigInteger(lineDat[1], 10);
+			Account a = createPlayerTeknetTrustAccount(name, lineDat[0], new Currency(new BigInteger(lineDat[1], 10)));
 			TEKNET_TRUST_STATE.add(a);
 		}
 	}
@@ -249,7 +260,7 @@ public class Bank {
 	private static void writeRegister() {
 		FileUtilities.clearDataFile("trust");
 		for(Account a : TEKNET_TRUST_STATE) {
-			String data = a.playerName + " " + a.amount.get().toString() + " " + a.name;
+			String data = a.playerName + " " + a.amount.get().toString(10) + " " + a.name;
 			FileUtilities.appendDataEntryTo("trust", data);
 		}
 	}

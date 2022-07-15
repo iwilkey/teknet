@@ -19,7 +19,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
 import io.github.iwilkey.teknetcore.economy.Shop;
-import io.github.iwilkey.teknetcore.economy.Shop.ShopSession;
+import io.github.iwilkey.teknetcore.economy.Shop.ShopBuySession;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
 
@@ -62,7 +62,7 @@ public class ServerEventListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerMove(PlayerMoveEvent e) {
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
 			if(e.getPlayer().getLocation().getX() != s.startedAt.getX() ||
 					e.getPlayer().getLocation().getY() != s.startedAt.getY() ||
@@ -76,7 +76,7 @@ public class ServerEventListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerItemDrop(PlayerDropItemEvent e) {
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
 			ChatUtilities.messageTo(e.getPlayer(), "You cannot drop items while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
@@ -85,7 +85,7 @@ public class ServerEventListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerInteraction(PlayerInteractEvent e) {
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
 			ChatUtilities.messageTo(e.getPlayer(), "You cannot interact with anything while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
@@ -95,27 +95,27 @@ public class ServerEventListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerLogin(PlayerLoginEvent e) {
 		e.getPlayer().setGameMode(GameMode.SURVIVAL);
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerJoin(PlayerJoinEvent e) {
 		e.getPlayer().setGameMode(GameMode.SURVIVAL);
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerKick(PlayerKickEvent e) {
 		e.getPlayer().setGameMode(GameMode.SURVIVAL);
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerLeave(PlayerQuitEvent e) {
-		ShopSession s = Shop.getShopSessionOf(e.getPlayer());
+		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	

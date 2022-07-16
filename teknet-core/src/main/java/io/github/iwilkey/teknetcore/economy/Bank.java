@@ -256,6 +256,8 @@ public class Bank {
 		}
 	}
 	
+	
+	// TODO: FIX THE DUPLICATING ACCOUNT GLITCH WHEN WRITING THE REGISTER!
 	private static void writeRegister() {
 		FileUtilities.clearDataFile("trust");
 		for(Account a : TEKNET_TRUST_STATE) {

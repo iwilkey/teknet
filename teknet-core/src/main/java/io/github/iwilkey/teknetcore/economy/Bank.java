@@ -166,6 +166,7 @@ public class Bank {
 		
 		public boolean add(Player player, Currency second) {
 			amount = Bank.add(amount, second);
+			if(second.get() == BigInteger.valueOf(0)) return false;
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
 					"" + ChatColor.GREEN + " +$ -> " + ChatColor.GOLD + "" 
 			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
@@ -176,6 +177,7 @@ public class Bank {
 		
 		public boolean subtract(Player player, Currency second) {
 			Currency buffer = Bank.subtract(amount, second);
+			if(second.get() == BigInteger.valueOf(0)) return true;
 			if(buffer.get().compareTo(BigInteger.valueOf(0)) < 0) return false;
 			amount = buffer;
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
@@ -209,10 +211,7 @@ public class Bank {
 	}
 	
 	public static Account createPlayerTeknetTrustAccount(String name, String playerName, Currency startFunds) {
-		if(accountExists(name, playerName)) {
-			ChatUtilities.logTo(PlayerUtilities.get(playerName), "You already own an account by this name!", ChatUtilities.LogType.FATAL);
-			return null;
-		}
+		if(accountExists(name, playerName)) TEKNET_TRUST_STATE.remove(new Account(name, playerName));
 		TEKNET_TRUST_STATE.add(new Account(name, playerName));
 		Account a = TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
 		a.amount = startFunds;

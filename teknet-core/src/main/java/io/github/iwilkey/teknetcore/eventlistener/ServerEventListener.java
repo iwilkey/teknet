@@ -3,6 +3,7 @@ package io.github.iwilkey.teknetcore.eventlistener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,6 +16,7 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 
 import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
@@ -117,6 +119,19 @@ public class ServerEventListener implements Listener {
 	public static void onPlayerLeave(PlayerQuitEvent e) {
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
+	}
+	
+	// TODO: Patch a shop cheat where if you "lag" out while in a shop session, you will respawn with all the items.
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public static void onPluginDisable(PluginDisableEvent e) {
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			ShopBuySession s = Shop.getShopSessionOf(p);
+			if(s != null) {
+				Shop.stopShopSession(p);
+				ChatUtilities.logTo(p, ChatColor.GOLD + "To prevent from an undesirable or unintended occurance during routine TeknetCore maintenance, your shop session has been safely ended. Please wait about 10 (s) and try again.", ChatUtilities.LogType.NOTICE);
+			}
+		}
 	}
 	
 }

@@ -78,6 +78,33 @@ public class Shop {
 				public void func(Player sender, String[] args) {
 					// /shop sell this
 					// /shop sell all
+					ShopBuySession ss = getShopSessionOf(sender);
+					if(ss != null) {
+						ChatUtilities.logTo(sender, "You cannot use this function while in an active buy session! Done? [shop-checkout]", ChatUtilities.LogType.FATAL);
+						return;
+					}
+					if(args[1].equals("all")) {
+						Currency c = getCurrentShopSessionSubtotal(sender, true, true);
+						Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+						a.add(sender, c);
+						sender.getInventory().clear();
+					} else if(args[1].equals("this")) {
+						ItemStack holding =  sender.getInventory().getItem(sender.getInventory().getHeldItemSlot());
+						if(holding == null) {
+							ChatUtilities.logTo(sender, "You are not holding an item to sell!", ChatUtilities.LogType.NOTICE);
+							return;
+						}
+						Material mat = holding.getType();
+						ShopItem s = Store.getShopItem(mat.name());
+						Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+						a.add(sender, Bank.multiply(s.price, holding.getAmount()));
+						ChatUtilities.logTo(sender, "► You have sold " + ChatColor.GOLD + " x " 
+								+ holding.getAmount() + " " + ChatColor.GOLD + mat.name() + ChatColor.GRAY + " for " 
+								+ Bank.multiply(s.price, holding.getAmount()).printValueColored(), ChatUtilities.LogType.SUCCESS);
+						sender.getInventory().setItem(sender.getInventory().getHeldItemSlot(), null);
+					} else {
+						ChatUtilities.logTo(sender, "Invalid use of [shop-sell-<this-OR-all>]", ChatUtilities.LogType.FATAL);
+					}
 				}
 			};
 			
@@ -89,7 +116,7 @@ public class Shop {
 						ChatUtilities.logTo(sender, "You're not in an active shop session! Use [shop-buy] or [shop-sell] to begin!", ChatUtilities.LogType.FATAL);
 						return;
 					}
-					Bank.Currency total = getCurrentShopSessionSubtotal(sender, false);
+					Bank.Currency total = getCurrentShopSessionSubtotal(sender, false, false);
 					if(total == null) return;
 					Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
 					if(a == null) a = Bank.createPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
@@ -120,22 +147,41 @@ public class Shop {
 			Function subtotal = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
-					getCurrentShopSessionSubtotal(sender, true);
+					getCurrentShopSessionSubtotal(sender, true, false);
 				}
 			};
 			
 			Function quit = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
-					if(stopShopSession(sender)) 
-						sender.getInventory().clear();
+					ShopBuySession s = getShopSessionOf(sender);
+					if(stopShopSession(sender)) {
+						sender.getInventory().setContents(s.survivalInventory);
+						sender.getInventory().setArmorContents(s.survivalArmor);
+					}
 				}
 			};
 			
 			Function value = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
-					// Value of item selected.
+					if(args.length == 1) {
+						// Value of item selected...
+						ItemStack holding =  sender.getInventory().getItem(sender.getInventory().getHeldItemSlot());
+						if(holding == null) {
+							ChatUtilities.logTo(sender, "You are not holding an object!", ChatUtilities.LogType.NOTICE);
+							return;
+						}
+						Material mat = holding.getType();
+						ShopItem s = Store.getShopItem(mat.name());
+						ChatUtilities.logTo(sender, "You are holding: " + ChatColor.GOLD + mat.name(), ChatUtilities.LogType.UTILITY);
+						ChatUtilities.messageTo(sender, " ► Sell value: " + s.sellValue.printValueColored() + ChatColor.GOLD 
+								+ " x " + ChatColor.WHITE + holding.getAmount() + ChatColor.GOLD
+							+ " = " + Bank.multiply(s.sellValue, holding.getAmount()).printValueColored(), ChatColor.GREEN);
+					} else if(args[1].equals("all")) {
+						// Value of entire inventory...
+						getCurrentShopSessionSubtotal(sender, true, true);
+					}
 				}
 			};
 			
@@ -145,7 +191,7 @@ public class Shop {
 			registerFunction("checkout", endSession, 0);
 			registerFunction("subtotal", subtotal, 0, "sub", "tot", "s");
 			registerFunction("quit", quit, 0, "q", "exit", "stop");
-			registerFunction("value", value, 0, "p", "price");
+			registerFunction("value", value, "p", "price");
 		}
 
 		@Override
@@ -218,10 +264,10 @@ public class Shop {
 				COMPUTERCRAFT(5, 1),
 				IC2(2, 1),
 				FORESTRY(1, 1),
-				BIGREACTORS(5, 1),
-				BUILDCRAFTBUILDERS(5, 1),
-				BUILDCRAFTENERGY(5, 1),
-				BUILDCRAFTROBOTICS(5, 1),
+				BIGREACTORS(4, 1),
+				BUILDCRAFTBUILDERS(3, 1),
+				BUILDCRAFTENERGY(3, 1),
+				BUILDCRAFTROBOTICS(4, 1),
 				CARPENTERSBLOCKS(1, 0),
 				COMPUTERCRAFTEDU(2, 0),
 				RAILCRAFT(2, 1),
@@ -232,7 +278,7 @@ public class Shop {
 				IRONCHEST(5, 1),
 				JABBA(3, 1),
 				NETHERORES(4, 1),
-				PROJECTE(5, 2),
+				PROJECTE(3, 2),
 				QUIVERCHEVSKY(4, 2),
 				REDSTONEARSENAL(3, 1),
 				JAKJ_REDSTONEINMOTION(2, 1),
@@ -362,6 +408,9 @@ public class Shop {
 							if(s.equals("COPPER") || s.equals("CABLE") 
 									|| s.equals("WIRE") || s.equals("GEAR")) value = 1;
 							if(s.equals("DIAMOND")) value = 3;
+							if(s.equals("DM") || s.equals("ITEMPE") || s.equals("MATTER")) value = 5;
+							if(s.equals("FUEL")) value = 3;
+							if(tok[0].equals("PROJECTE") && s.equals("GEM")) value = 9;
 						}
 						cat.items.add(new ShopItem(line[0], cat, Bank.returnRandomCurrencyOfValue(value, 250.0f), 
 							Bank.returnRandomCurrencyOfValue(value - 1, 200.0f)));
@@ -444,9 +493,9 @@ public class Shop {
 		return true;
 	}
 	
-	public static Bank.Currency getCurrentShopSessionSubtotal(Player player, boolean verbose) {
+	public static Bank.Currency getCurrentShopSessionSubtotal(Player player, boolean verbose, boolean selling) {
 		ShopBuySession s = getShopSessionOf(player);
-		if(s == null) {
+		if(s == null && !selling) {
 			ChatUtilities.logTo(player, "You are not currently in a buy session! Use [shop-buy] to begin one.", 
 					ChatUtilities.LogType.FATAL);
 			return null;
@@ -459,15 +508,16 @@ public class Shop {
 				ShopItem item = Store.getShopItem(mat.name());
 				if(item == null) continue;
 				int amount = ss.getAmount();
-				Currency full = Bank.multiply(item.price, amount);
+				Currency full = Bank.multiply(((selling) ? item.sellValue : item.price), amount);
 				ChatUtilities.messageTo(player, "Item: " + mat.name() + 
-						" is " + item.price.printValueColored() + ChatColor.GRAY + " x " + ChatColor.GOLD + amount + 
-						ChatColor.GOLD + " = " + full.printValueColored(), 
+						" is " + ((selling) ? item.sellValue.printValueColored() : item.price.printValueColored()) + ChatColor.GRAY + " x " + ChatColor.GOLD + amount + 
+						ChatColor.GRAY + " = " + full.printValueColored(), 
 						ChatColor.GRAY);
 				subtotal = Bank.add(subtotal, full);
 			} catch (Exception e) { continue; }
 		}
-		if(verbose) ChatUtilities.messageTo(player, ChatColor.DARK_GREEN + "Current subtotal: " + subtotal.printValueColored(),
+		if(verbose) ChatUtilities.messageTo(player, ChatColor.DARK_GREEN + 
+				((!selling) ? " ► Current subtotal: " : " ► Inventory sell value: ") + subtotal.printValueColored(),
 				ChatColor.GRAY);
 		return subtotal;
 	}

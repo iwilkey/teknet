@@ -34,10 +34,10 @@ public class PlayerServerUtilities {
 		@Override
 		public boolean logic(Player sender, Command command, String label, String[] args) {
 			SoundUtilities.playSoundTo("NOTE_PIANO", sender);
-			ChatUtilities.logTo(sender, ChatColor.WHITE + "Teknet speeds are currently rated: \"" + returnStatus() + "\" clocking in at " + ChatColor.GOLD
-					+ "" + TeknetCore.SERVER_TPS + ChatColor.WHITE + " tick(s) per second.", ChatUtilities.LogType.UTILITY);
-			ChatUtilities.messageTo(sender, "  Note: If you are lagging but the server TPS is fine, "
-					+ "it is often the fault of your own internet connection...", ChatColor.GRAY);
+			ChatUtilities.logTo(sender, ChatColor.WHITE + "Teknet speeds are currently rated  \"" + returnStatus() + "\" clocking in at " + ChatColor.GOLD
+					+ "" + TeknetCore.SERVER_TPS + ChatColor.WHITE + " tick(s) per second. That is about " 
+					+ ChatColor.GOLD + ((TeknetCore.SERVER_TPS / 20.0f) * 100.0f) 
+					+ "%" + ChatColor.WHITE + " efficiency.", ChatUtilities.LogType.UTILITY);
 			return true;
 		}
 		private static String returnStatus() {

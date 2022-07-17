@@ -21,13 +21,13 @@ public class ChatUtilities {
 				lines[line] = highlightCommands(content, ChatColor.WHITE);
 			}
 			public void renderTo(Player player) {
+				SoundUtilities.playSoundTo("CLICK", player);
 				for(int i = 0; i < 9; i++) 
 					messageTo(player, lines[i], ChatColor.WHITE);
 			}
 			public boolean searchFor(String word) {
 				for(String line : lines) {
 					String[] words = line.split(" ");
-					
 					for(String w : words) {
 						if(w.replaceAll("[^A-Za-z]+", "").contains(word))
 							return true;
@@ -112,16 +112,25 @@ public class ChatUtilities {
 		String m = highlightCommands(message, ChatColor.GRAY);
 		switch(type) {
 			case SUCCESS: ChatUtilities.tagAndMessageTo(player, "TeknetCore Success", m, ChatColor.GREEN, 
-					ChatColor.DARK_GREEN, ChatColor.GRAY); break;
+					ChatColor.DARK_GREEN, ChatColor.GRAY); 
+					SoundUtilities.playSoundTo("NOTE_PLING", player); 
+					break;
 			case NOTICE: ChatUtilities.tagAndMessageTo(player, "TeknetCore Notice", m, ChatColor.YELLOW, 
-					ChatColor.GOLD, ChatColor.GRAY); break;
+					ChatColor.GOLD, ChatColor.GRAY); 
+					SoundUtilities.playSoundTo("NOTE_SNARE_DRUM", player); 
+					break;
 			case FATAL: ChatUtilities.tagAndMessageTo(player, "TeknetCore Error", m, ChatColor.RED, 
-					ChatColor.DARK_RED, ChatColor.GRAY); break;
+					ChatColor.DARK_RED, ChatColor.GRAY);
+					SoundUtilities.playSoundTo("NOTE_BASS", player); 
+					break;
 			case UTILITY: ChatUtilities.tagAndMessageTo(player, "TeknetCore Utilities", m, ChatColor.BLUE, 
-					ChatColor.DARK_BLUE, ChatColor.GRAY); break;
+					ChatColor.DARK_BLUE, ChatColor.GRAY); 
+					SoundUtilities.playSoundTo("NOTE_STICKS", player); 		
+					break;
 			case ADMIN_UTILITY: ChatUtilities.tagAndMessageTo(player, "TeknetCore Admin Utilities", m, ChatColor.LIGHT_PURPLE, 
-					ChatColor.DARK_PURPLE, ChatColor.GRAY); break;
-				
+					ChatColor.DARK_PURPLE, ChatColor.GRAY); 
+					SoundUtilities.playSoundTo("PISTON_EXTEND", player);
+					break;
 		}
 	}
 	

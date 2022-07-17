@@ -2,7 +2,6 @@ package io.github.iwilkey.teknetcore.eventlistener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,7 +22,10 @@ import io.github.iwilkey.teknetcore.cooldown.Cooldown;
 import io.github.iwilkey.teknetcore.economy.Shop;
 import io.github.iwilkey.teknetcore.economy.Shop.ShopBuySession;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
+import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
+import io.github.iwilkey.teknetcore.utils.PlayerUtilities;
+import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 
 public class ServerEventListener implements Listener {
 	
@@ -70,6 +72,7 @@ public class ServerEventListener implements Listener {
 					e.getPlayer().getLocation().getY() != s.startedAt.getY() ||
 					e.getPlayer().getLocation().getZ() != s.startedAt.getZ()) {
 				e.getPlayer().teleport(s.startedAt);
+				SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
 				ChatUtilities.messageTo(e.getPlayer(), 
 						"You cannot move during while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			}
@@ -80,6 +83,7 @@ public class ServerEventListener implements Listener {
 	public static void onPlayerItemDrop(PlayerDropItemEvent e) {
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
+			SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
 			ChatUtilities.messageTo(e.getPlayer(), "You cannot drop items while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
 		}
@@ -89,6 +93,7 @@ public class ServerEventListener implements Listener {
 	public static void onPlayerInteraction(PlayerInteractEvent e) {
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
+			SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
 			ChatUtilities.messageTo(e.getPlayer(), "You cannot interact with anything while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
 		}
@@ -96,27 +101,33 @@ public class ServerEventListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerLogin(PlayerLoginEvent e) {
-		e.getPlayer().setGameMode(GameMode.SURVIVAL);
+		ChatUtilities.messageOnline("Welcome to Teknet, " + e.getPlayer().getName(), ChatColor.DARK_PURPLE);
+		SoundUtilities.playSoundToOnline("FIREWORK_BLAST");
+		Ranks.setRank(e.getPlayer(), Rank.HOBBYIST, true);
+		e.getPlayer().setPlayerListName(Rank.HOBBYIST.color + e.getPlayer().getName());
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerJoin(PlayerJoinEvent e) {
-		e.getPlayer().setGameMode(GameMode.SURVIVAL);
+		Rank rank = Ranks.getPlayerRank(e.getPlayer());
+		e.getPlayer().setPlayerListName(rank.color + e.getPlayer().getName());
+		SoundUtilities.playSoundToOnline("DOOR_OPEN");
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerKick(PlayerKickEvent e) {
-		e.getPlayer().setGameMode(GameMode.SURVIVAL);
+		Ranks.setRank(e.getPlayer(), Rank.HOBBYIST, false);
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPlayerLeave(PlayerQuitEvent e) {
+		SoundUtilities.playSoundToOnline("DOOR_CLOSE");
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
@@ -129,9 +140,9 @@ public class ServerEventListener implements Listener {
 			ShopBuySession s = Shop.getShopSessionOf(p);
 			if(s != null) {
 				Shop.stopShopSession(p);
+				SoundUtilities.playSoundTo("GLASS", PlayerUtilities.get(s.playerName));
 				ChatUtilities.logTo(p, ChatColor.GOLD + "To prevent from an undesirable or unintended occurance during routine TeknetCore maintenance, your shop session has been safely ended. Please wait about 10 (s) and try again.", ChatUtilities.LogType.NOTICE);
 			}
 		}
 	}
-	
 }

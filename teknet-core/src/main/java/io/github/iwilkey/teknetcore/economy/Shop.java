@@ -21,6 +21,7 @@ import io.github.iwilkey.teknetcore.utils.ChatUtilities;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation.Page;
 import io.github.iwilkey.teknetcore.utils.FileUtilities;
+import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 
 public class Shop {
 	
@@ -85,8 +86,12 @@ public class Shop {
 					}
 					if(args[1].equals("all")) {
 						Currency c = getCurrentShopSessionSubtotal(sender, true, true);
-						Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
-						a.add(sender, c);
+						Bank.Account a = Bank.getTeknetTrustAccount("CHECKING", sender);
+						if(a == null) {
+							Bank.createTeknetTrustAccount("CHECKING", sender);
+							a = Bank.getTeknetTrustAccount("CHECKING", sender);
+						}
+						a.add(sender, c, "TC SELL POC");
 						sender.getInventory().clear();
 					} else if(args[1].equals("this")) {
 						ItemStack holding =  sender.getInventory().getItem(sender.getInventory().getHeldItemSlot());
@@ -96,8 +101,12 @@ public class Shop {
 						}
 						Material mat = holding.getType();
 						ShopItem s = Store.getShopItem(mat.name());
-						Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
-						a.add(sender, Bank.multiply(s.price, holding.getAmount()));
+						Bank.Account a = Bank.getTeknetTrustAccount("CHECKING", sender);
+						if(a == null) {
+							Bank.createTeknetTrustAccount("CHECKING", sender);
+							a = Bank.getTeknetTrustAccount("CHECKING", sender);
+						}
+						a.add(sender, Bank.multiply(s.price, holding.getAmount()), "TC SELL POC");
 						ChatUtilities.logTo(sender, "► You have sold " + ChatColor.GOLD + " x " 
 								+ holding.getAmount() + " " + ChatColor.GOLD + mat.name() + ChatColor.GRAY + " for " 
 								+ Bank.multiply(s.price, holding.getAmount()).printValueColored(), ChatUtilities.LogType.SUCCESS);
@@ -113,23 +122,26 @@ public class Shop {
 				public void func(Player sender, String[] args) {
 					ShopBuySession s = getShopSessionOf(sender);
 					if(s == null) {
-						ChatUtilities.logTo(sender, "You're not in an active shop session! Use [shop-buy] or [shop-sell] to begin!", ChatUtilities.LogType.FATAL);
+						ChatUtilities.logTo(sender, "You're not in an active shop session! Use [shop-buy] or to begin!", ChatUtilities.LogType.FATAL);
 						return;
 					}
 					Bank.Currency total = getCurrentShopSessionSubtotal(sender, false, false);
 					if(total == null) return;
-					Bank.Account a = Bank.getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
-					if(a == null) a = Bank.createPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
+					Bank.Account a = Bank.getTeknetTrustAccount("CHECKING", sender);
+					if(a == null) {
+						Bank.createTeknetTrustAccount("CHECKING", sender);
+						a = Bank.getTeknetTrustAccount("CHECKING", sender);
+					}
 					ChatUtilities.messageTo(sender, 
 							" ► Account chosen: " + a.name + " = " + a.amount.printValueColored(), 
 							ChatColor.GRAY);
 					ChatUtilities.messageTo(sender, 
 							" ► Total due = " + total.printValueColored(), 
 							ChatColor.GRAY);
-					if(!a.subtract(sender, total)) {
-						ChatUtilities.messageTo(sender, 
+					if(!a.subtract(sender, total, "TC BUY POC")) {
+						ChatUtilities.logTo(sender, 
 								" ► Payment declined! Please try a different method of payment or [shop-quit]", 
-								ChatColor.DARK_RED);
+								ChatUtilities.LogType.FATAL);
 						return;
 					} else {
 
@@ -474,6 +486,7 @@ public class Shop {
 			return false;
 		}
 		SHOP_SESSION_STATE.add(new ShopBuySession(player));
+		SoundUtilities.playSoundTo("CHEST_OPEN", player);
 		ChatUtilities.logTo(player, "Shop session started!", ChatUtilities.LogType.SUCCESS);
 		return true;
 	}
@@ -489,7 +502,8 @@ public class Shop {
 		player.getInventory().setArmorContents(s.survivalArmor);
 		player.setGameMode(GameMode.SURVIVAL);
 		SHOP_SESSION_STATE.remove(s);
-		ChatUtilities.logTo(player, "Shop checkout complete. Thank you for your patronage!", ChatUtilities.LogType.SUCCESS);
+		SoundUtilities.playSoundTo("CHEST_CLOSE", player);
+		ChatUtilities.logTo(player, "Shop session ended.", ChatUtilities.LogType.SUCCESS);
 		return true;
 	}
 	
@@ -514,11 +528,15 @@ public class Shop {
 						ChatColor.GRAY + " = " + full.printValueColored(), 
 						ChatColor.GRAY);
 				subtotal = Bank.add(subtotal, full);
+				SoundUtilities.playSoundTo("LAVA_POP", player);
 			} catch (Exception e) { continue; }
 		}
-		if(verbose) ChatUtilities.messageTo(player, ChatColor.DARK_GREEN + 
+		if(verbose) {
+			ChatUtilities.messageTo(player, ChatColor.DARK_GREEN + 
 				((!selling) ? " ► Current subtotal: " : " ► Inventory sell value: ") + subtotal.printValueColored(),
 				ChatColor.GRAY);
+			SoundUtilities.playSoundTo("SUCCESSFUL_HIT", player);
+		}
 		return subtotal;
 	}
 	 

@@ -2,7 +2,6 @@ package io.github.iwilkey.teknetcore;
 
 import java.util.ArrayList;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -77,7 +76,11 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 					printAllHelp((Player)sender);
 					return true;
 				}
-				printHelp((Player)sender, Integer.parseInt(args[1]));
+				try {
+					printHelp((Player)sender, Integer.parseInt(args[1]));
+				} catch (Exception e) {
+					ChatUtilities.logTo((Player)sender, "You have entered an invalid manual page number!", ChatUtilities.LogType.FATAL);
+				}
 			} else throwError((Player)sender, CommandError.INVALID_ARGUMENTS);
 			return true;
 		}
@@ -124,19 +127,18 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 	protected void throwError(Player player, CommandError error) {
 		switch(error) {
 			case INVALID_SYNTAX:
-				ChatUtilities.logTo(player, "Incorrect [" + commandName + "] command syntax!", ChatUtilities.LogType.FATAL);
+				ChatUtilities.logTo(player, "Incorrect [" + commandName + "] command syntax! Please use [" + commandName + "-help] for instructions on how to use the command correctly.", ChatUtilities.LogType.FATAL);
 				break;
 			case INVALID_ARGUMENTS:
-				ChatUtilities.logTo(player, "Invalid [" + commandName + "] argument(s)!", ChatUtilities.LogType.FATAL);
+				ChatUtilities.logTo(player, "Invalid [" + commandName + "] argument(s)! Please use [" + commandName + "-help] for instructions on how to use the command correctly.", ChatUtilities.LogType.FATAL);
 				break;
 			case NO_ARGUMENTS:
-				ChatUtilities.logTo(player, "[" + commandName + "] does not accept any additional arguments besides [" + commandName + "-help]!", ChatUtilities.LogType.FATAL);
+				ChatUtilities.logTo(player, "[" + commandName + "] does not accept any additional arguments besides [" + commandName + "-help]! Please use [" + commandName + "-help] for instructions on how to use the command correctly.", ChatUtilities.LogType.FATAL);
 				break;
 			case NO_SUCH_COMMAND:
-				ChatUtilities.logTo(player, "[" + commandName + "] does not contain the command function you have entered.", ChatUtilities.LogType.FATAL);
+				ChatUtilities.logTo(player, "[" + commandName + "] does not contain the command function you have entered. Please use [" + commandName + "-help] for instructions on how to use the command correctly.", ChatUtilities.LogType.FATAL);
 				break;
 		}
-		ChatUtilities.messageTo(player, "   Please use [" + commandName + "-help] for instructions on how to use the command correctly.", ChatColor.GRAY);
 	}
 	public void printHelp(Player player, int page) {
 		doc.renderPageTo(player, page - 1);

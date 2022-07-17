@@ -129,6 +129,11 @@ public class Ranks {
 				ChatColor.BOLD + rank.title + ChatColor.RESET + ChatColor.BOLD + rank.brackets + "] " + ChatColor.RESET;
 	}
 	
+	public static String introShort(Rank rank) {
+		return ChatColor.BOLD + "" + rank.brackets + "[" + rank.color + 
+				ChatColor.BOLD + rank.title.charAt(0) + ChatColor.RESET + ChatColor.BOLD + rank.brackets + "] " + ChatColor.RESET;
+	}
+
 	public static Rank getRankFromLevel(int level) {
 		for(Rank r : Rank.values())
 			if(r.level == level)

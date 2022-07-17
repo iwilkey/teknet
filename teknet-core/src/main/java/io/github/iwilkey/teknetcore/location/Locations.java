@@ -18,6 +18,7 @@ import io.github.iwilkey.teknetcore.utils.ChatUtilities;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation.Page;
 import io.github.iwilkey.teknetcore.utils.FileUtilities;
+import io.github.iwilkey.teknetcore.utils.MathUtilities;
 import io.github.iwilkey.teknetcore.utils.PlayerUtilities;
 import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 
@@ -57,12 +58,14 @@ public class Locations {
 			public int ticksSince,
 				secLeftOld = 0,
 				secLeftNew = (int)TELEPORT_WAIT_TIMES[0];
+			public String messageDone;
 			public float secondsSince;
-			public TeleportRequest(String playerName, Location l) {
+			public TeleportRequest(String playerName, Location l, String messageDone) {
 				this.playerName = playerName;
 				this.destination = l;
 				ticksSince = 0;
 				secondsSince = 0.0f;
+				this.messageDone = messageDone;
 			}
 		}
 		
@@ -74,7 +77,7 @@ public class Locations {
 			toDelete = new ArrayList<>();
 		}
 		
-		public static boolean teleportTo(Player p, Location l) {
+		public static boolean teleportTo(Player p, Location l, String messageDone) {
 			for(TeleportRequest request : TELEPORT_STATE) {
 				if(request.playerName.equals(p.getName())) {
 					SoundUtilities.playSoundTo("NOTE_BASS_GUITAR", p);
@@ -84,11 +87,11 @@ public class Locations {
 			}
 			Rank playerRank = Ranks.getPlayerRank(p);
 			SoundUtilities.playSoundTo("WOOD_CLICK", p);
-			TeleportRequest request = new TeleportRequest(p.getName(), l);
+			TeleportRequest request = new TeleportRequest(p.getName(), l, messageDone);
 			if(request.secLeftNew > 0 && request.secLeftNew != TELEPORT_WAIT_TIMES[playerRank.level - 1] && playerRank.level < 7)
 				ChatUtilities.messageTo(p, "Teleporting in " + ChatColor.GREEN + TELEPORT_WAIT_TIMES[playerRank.level - 1] + ChatColor.GOLD + " (s)...", ChatColor.GOLD);
 			request.secLeftNew = TELEPORT_WAIT_TIMES[playerRank.level - 1];
-			TELEPORT_STATE.add(new TeleportRequest(p.getName(), l));
+			TELEPORT_STATE.add(request);
 			return true;
 		}
 		
@@ -122,7 +125,7 @@ public class Locations {
 					p.teleport(l);
 					p.getLocation().getWorld().playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES, 512);
 					SoundUtilities.playSoundTo("LEVEL_UP", p);
-					ChatUtilities.messageTo(Bukkit.getPlayer(request.playerName), "Poof!", ChatColor.LIGHT_PURPLE);
+					ChatUtilities.messageTo(Bukkit.getPlayer(request.playerName), request.messageDone, ChatColor.LIGHT_PURPLE);
 					toDelete.add(request);
 				}
 			}
@@ -270,10 +273,30 @@ public class Locations {
 						}
 						for(Position p : data.locations)
 							if(p.name.equals(args[1])) {
-								Locations.Teleport.teleportTo(sender, p.position);
+								Locations.Teleport.teleportTo(sender, p.position, "Poof!");
 								return;
 							}
 						ChatUtilities.logTo(sender, "You do not have a saved location with this name!", ChatUtilities.LogType.FATAL);
+					}
+				};
+				
+				Function randomFunction = new Function() {
+					private final int RANGE = 10000;
+					@Override
+					public void func(Player sender, String[] args) {
+						int x = MathUtilities.randomIntBetween(sender.getLocation().getBlockX() - RANGE, 
+								sender.getLocation().getBlockX() + RANGE);
+					    int y = 156;
+					    int z = MathUtilities.randomIntBetween(sender.getLocation().getBlockZ() - RANGE, 
+					    		sender.getLocation().getBlockZ() + RANGE);
+					    if(sender.getWorld().getBlockAt(x, y, z).isEmpty()) {
+							while(sender.getWorld().getBlockAt(x, y - 1, z).isEmpty() && y > 0) y--;
+							Location lpp = sender.getLocation();
+							lpp.setX(x);
+							lpp.setY(y + 2);
+							lpp.setZ(z);
+							Teleport.teleportTo(sender, lpp, "Is this location good enough for you?");
+					    }
 					}
 				};
 				
@@ -293,11 +316,12 @@ public class Locations {
 					}
 				};
 				
-				registerFunction("save", saveFunction, 1);
-				registerFunction("delete", deleteFunction, 1);
-				registerFunction("list", listFunction, 0);
-				registerFunction("go", goFunction, 1);
-				registerFunction("rename", renameFunction, 2);
+				registerFunction("save", saveFunction, 1, "s");
+				registerFunction("delete", deleteFunction, 1, "d");
+				registerFunction("list", listFunction, 0, "l");
+				registerFunction("go", goFunction, 1, "g");
+				registerFunction("rename", renameFunction, 2, "r");
+				registerFunction("random", randomFunction, 0, "rand");
 				translateRegister();
 			}
 			
@@ -314,7 +338,7 @@ public class Locations {
 				doc.addPage(new Page());
 				doc.editPage(1).write("Use [position-rename-<target>-<new-name>] to rename an", 0);
 				doc.editPage(1).write("    existing position.", 1);
-				doc.editPage(1).write("", 2);
+				doc.editPage(1).write("Use [position-random] to teleport to a random position.", 2);
 				doc.editPage(1).write("", 3);
 				doc.editPage(1).write("", 4);
 				doc.editPage(1).write("", 5);
@@ -441,7 +465,7 @@ public class Locations {
 					ChatUtilities.logTo(sender, "You do not have a home to go to! Use [sethome] to set one.", ChatUtilities.LogType.FATAL);
 					return true;
 				}
-				Teleport.teleportTo(sender, home);
+				Teleport.teleportTo(sender, home, "Welcome home.");
 				return true;
 			}
 			@Override

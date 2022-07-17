@@ -3,20 +3,17 @@ package io.github.iwilkey.teknetcore.economy;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 import io.github.iwilkey.teknetcore.TeknetCoreCommand;
-import io.github.iwilkey.teknetcore.location.Locations.Home.HomeData;
 import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
 import io.github.iwilkey.teknetcore.utils.FileUtilities;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.MathUtilities;
-import io.github.iwilkey.teknetcore.utils.PlayerUtilities;
+import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 
 public class Bank {
 	
@@ -109,18 +106,15 @@ public class Bank {
 				public void func(Player sender, String[] args) {
 					Account a = null;
 					if(args.length == 1) {
-						a = getPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
-						if(a == null) a = createPlayerTeknetTrustAccount("GENERAL CHECKING", sender);
-					}
-					else {
-						String search = "";
-						for(int i = 1; i < args.length; i++) {
-							search += args[i].toUpperCase();
-							if(i != args.length - 1) search += " ";
-						}
-						a = getPlayerTeknetTrustAccount(search, sender);
+						a = getTeknetTrustAccount("CHECKING", sender);
 						if(a == null) {
-							ChatUtilities.logTo(sender, "You do not have an account registered under this name.", ChatUtilities.LogType.FATAL);
+							createTeknetTrustAccount("CHECKING", sender);
+							a = getTeknetTrustAccount("CHECKING", sender);
+						}
+					} else {
+						a = getTeknetTrustAccount(args[1], sender);
+						if(a == null) {
+							ChatUtilities.logTo(sender, "The multiple account feature is still under construction.", ChatUtilities.LogType.FATAL);
 							return;
 						}
 					}
@@ -158,106 +152,69 @@ public class Bank {
 			this.name = name;
 			amount = new Currency(0L);
 		}
+		public Account(String name, String playerName, Currency amount) {
+			this.playerName = playerName;
+			this.name = name;
+			this.amount = amount;
+		}
 		public void printStatus(Player player) {
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
 					"► " + ChatColor.GOLD + name + ": " + amount.printValueColored(),
 					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GRAY);
+			SoundUtilities.playSoundTo("DIG_WOOL", player);
 		}
 		
-		public boolean add(Player player, Currency second) {
+		public boolean add(Player player, Currency second, String reason) {
 			amount = Bank.add(amount, second);
 			if(second.get() == BigInteger.valueOf(0)) return false;
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
-					"" + ChatColor.GREEN + " +$ -> " + ChatColor.GOLD + "" 
-			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
+					"" + ChatColor.GREEN + " +++$ " + ChatColor.GOLD + "" 
+			+ ChatColor.GOLD + name + ChatColor.GOLD + " for " + ChatColor.DARK_AQUA + reason, 
 					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GOLD);
 			writeRegister();
+			SoundUtilities.playSoundTo("LEVEL_UP", player);
 			return true;
 		}
 		
-		public boolean subtract(Player player, Currency second) {
+		public boolean subtract(Player player, Currency second, String reason) {
 			Currency buffer = Bank.subtract(amount, second);
 			if(second.get() == BigInteger.valueOf(0)) return true;
 			if(buffer.get().compareTo(BigInteger.valueOf(0)) < 0) return false;
 			amount = buffer;
 			ChatUtilities.tagAndMessageTo(player, "TeknetTrust", 
-					"" + ChatColor.DARK_RED + " -$ <- " + ChatColor.GOLD + "" 
-			+ ChatColor.LIGHT_PURPLE + name + ChatColor.GOLD, 
+					"" + ChatColor.DARK_RED + " ---$ " + ChatColor.GOLD + "" 
+			+ ChatColor.GOLD + name + ChatColor.GOLD + " for " + ChatColor.DARK_AQUA + reason, 
 					ChatColor.GREEN, ChatColor.DARK_GREEN, ChatColor.GOLD);
 			writeRegister();
+			SoundUtilities.playSoundTo("NOTE_BASS_GUITAR", player);
 			return true;
 		}
 		
 	}
 	
-	public static Account createPlayerTeknetTrustAccount(String name, Player player) {
-		if(accountExists(name, player)) {
-			ChatUtilities.logTo(player, "You already own an account by this name!", ChatUtilities.LogType.FATAL);
-			return null;
-		}
-		TEKNET_TRUST_STATE.add(new Account(name, player.getName()));
-		writeRegister();
-		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
-	}
-	
-	public static Account createPlayerTeknetTrustAccount(String name, String playerName) {
-		if(accountExists(name, playerName)) {
-			ChatUtilities.logTo(PlayerUtilities.get(playerName), "You already own an account by this name!", ChatUtilities.LogType.FATAL);
-			return null;
-		}
-		TEKNET_TRUST_STATE.add(new Account(name, playerName));
-		writeRegister();
-		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
-	}
-	
-	public static Account createPlayerTeknetTrustAccount(String name, String playerName, Currency startFunds) {
-		if(accountExists(name, playerName)) TEKNET_TRUST_STATE.remove(new Account(name, playerName));
-		TEKNET_TRUST_STATE.add(new Account(name, playerName));
-		Account a = TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
-		a.amount = startFunds;
-		writeRegister();
-		return TEKNET_TRUST_STATE.get(TEKNET_TRUST_STATE.size() - 1);
-	}
-	
-	public static Account getPlayerTeknetTrustAccount(String name, Player player) {
-		for(Account a : TEKNET_TRUST_STATE) 
+	public static Account getTeknetTrustAccount(String name, Player player) {
+		for(Account a : TEKNET_TRUST_STATE)
 			if(a.name.equals(name) && a.playerName.equals(player.getName()))
 				return a;
 		return null;
 	}
 	
-	private static boolean accountExists(String name, Player player) {
-		for(Account a : TEKNET_TRUST_STATE) 
+	public static boolean createTeknetTrustAccount(String name, Player player) {
+		for(Account a : TEKNET_TRUST_STATE)
 			if(a.name.equals(name) && a.playerName.equals(player.getName()))
-				return true;
-		return false;
-	}
-	
-	private static boolean accountExists(String name, String playerName) {
-		for(Account a : TEKNET_TRUST_STATE) 
-			if(a.name.equals(name) && a.playerName.equals(playerName))
-				return true;
-		return false;
+				return false;
+		TEKNET_TRUST_STATE.add(new Account(name, player.getName()));
+		return true;
 	}
 	
 	private static void translateRegister() {
 		if(!FileUtilities.fileExists("trust")) FileUtilities.createDataFile("trust");
 		TEKNET_TRUST_STATE.clear();
 		ArrayList<String[]> data = FileUtilities.readDataFileLines("trust");
-		for(String[] lineDat : data) {
-			String name = "";
-			for(int i = 2; i < lineDat.length; i++) {
-				name += lineDat[i];
-				if(i != lineDat.length - 1) 
-					name += " ";
-			}
-			Account a = createPlayerTeknetTrustAccount(name, lineDat[0], new Currency(new BigInteger(lineDat[1], 10)));
-			TEKNET_TRUST_STATE.add(a);
-		}
+		for(String[] lineDat : data)
+			TEKNET_TRUST_STATE.add(new Account(lineDat[2], lineDat[0], new Currency(new BigInteger(lineDat[1], 10))));
 	}
 	
-	
-	// TODO: FIX THE DUPLICATING ACCOUNT GLITCH WHEN WRITING THE REGISTER!
 	private static void writeRegister() {
 		FileUtilities.clearDataFile("trust");
 		for(Account a : TEKNET_TRUST_STATE) {

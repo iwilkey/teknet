@@ -26,3 +26,6 @@ commands:
    bank:
       description: Manage your funds.
       usage: "Use /bank help to learn how to use the bank!"
+   estate:
+      description: Manage your protected property!
+      usage: "Use /estate help to learn how to protect your property!"

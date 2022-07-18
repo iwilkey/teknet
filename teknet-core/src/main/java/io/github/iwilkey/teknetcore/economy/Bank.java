@@ -128,7 +128,14 @@ public class Bank {
 
 		@Override
 		protected void documentation(CommandDocumentation doc) {
-			
+			doc.editPage(0).write(ChatColor.GOLD + "The TeknetCore Bank is a tool for managing " + ChatColor.RESET, 1);
+			doc.editPage(0).write(ChatColor.GOLD + "    your funds available in game." + ChatColor.RESET, 2);
+			doc.editPage(0).write("Use [bank-help] to see this manual again.", 3);
+			doc.editPage(0).write("Use [bank-account] to see your checking account balance.", 4);
+			doc.editPage(0).write("", 5);
+			doc.editPage(0).write("", 6);
+			doc.editPage(0).write("", 7);
+			doc.editPage(0).write(ChatColor.GRAY + "------- End of TeknetCore manual. -------" + ChatColor.RESET, 8);
 		}
 
 		@Override

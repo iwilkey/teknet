@@ -151,6 +151,7 @@ public class Ranks {
 					ChatUtilities.messageOnline(ChatColor.GRAY + "Player " + player.getName() + " is now rank " + 
 						rank.color + rank.title + ChatColor.RESET + ChatColor.GRAY + "!", ChatColor.AQUA);
 				}
+				player.setPlayerListName(rank.color + player.getName());
 				writeRegister();
 				return;
 			}
@@ -169,6 +170,9 @@ public class Ranks {
 					ChatUtilities.messageOnline(ChatColor.GRAY + "Player " + playerName + " is now rank " + 
 							rank.color + rank.title + ChatColor.RESET + ChatColor.GRAY + "!", ChatColor.AQUA);
 				}
+				try {
+					PlayerUtilities.get(playerName).setPlayerListName(rank.color + playerName);
+				} catch(Exception ee) { return; }
 				writeRegister();
 				return;
 			}

@@ -225,7 +225,7 @@ public class Shop {
 			doc.editPage(1).write("[shop-buy] alternatives: [shop-b] [shop-start]", 5);
 			doc.editPage(1).write("[shop-catalog] alternatives: [shop-search] [shop-items]", 6);
 			doc.editPage(1).write("[shop-value] alternatives: [shop-p] [shop-price]", 7);
-			doc.editPage(1).write(ChatColor.GRAY + "------- End of TeknetCore Manual -------" + ChatColor.RESET, 8);
+			doc.editPage(1).write(ChatColor.GRAY + "------- End of TeknetCore manual. -------" + ChatColor.RESET, 8);
 		}
 
 		@Override

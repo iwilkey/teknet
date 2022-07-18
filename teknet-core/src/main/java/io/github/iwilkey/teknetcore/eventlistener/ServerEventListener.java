@@ -34,7 +34,8 @@ public class ServerEventListener implements Listener {
 		Cooldown.registerActivity(e.getPlayer(), "CHAT_EVENT");
 		if(!Cooldown.can(e.getPlayer())) {
 			ChatUtilities.logTo(e.getPlayer(), "You need to wait " + ChatColor.GREEN + Cooldown.timeTillReset(e.getPlayer()) + 
-					ChatColor.GRAY + " (s) before you can send more chats! Use [cooldown] to see how much time you have left to wait.", ChatUtilities.LogType.FATAL);
+					ChatColor.GRAY + " (s) before you can send more chats! Use "
+							+ "[cooldown] to see how much time you have left to wait.", ChatUtilities.LogType.FATAL);
 			e.setCancelled(true);
 			return;
 		}
@@ -74,7 +75,7 @@ public class ServerEventListener implements Listener {
 				e.getPlayer().teleport(s.startedAt);
 				SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
 				ChatUtilities.messageTo(e.getPlayer(), 
-						"You cannot move during while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
+						"Done shopping? [shop-checkout]", ChatColor.GRAY);
 			}
 		}
 	}
@@ -84,7 +85,7 @@ public class ServerEventListener implements Listener {
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
 			SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
-			ChatUtilities.messageTo(e.getPlayer(), "You cannot drop items while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
+			ChatUtilities.messageTo(e.getPlayer(), "Done shopping? [shop-checkout]", ChatColor.GRAY);
 			e.setCancelled(true);
 		}
 	}
@@ -94,7 +95,8 @@ public class ServerEventListener implements Listener {
 		ShopBuySession s = Shop.getShopSessionOf(e.getPlayer());
 		if(s != null) {
 			SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
-			ChatUtilities.messageTo(e.getPlayer(), "You cannot interact with anything while buying items!\n Done? [shop-checkout]", ChatColor.GRAY);
+			ChatUtilities.messageTo(e.getPlayer(), "Done shopping? [shop-checkout]", 
+					ChatColor.GRAY);
 			e.setCancelled(true);
 		}
 	}
@@ -132,8 +134,6 @@ public class ServerEventListener implements Listener {
 		if(s != null) Shop.stopShopSession(e.getPlayer());
 	}
 	
-	// TODO: Patch a shop cheat where if you "lag" out while in a shop session, you will respawn with all the items.
-	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onPluginDisable(PluginDisableEvent e) {
 		for(Player p : Bukkit.getOnlinePlayers()) {
@@ -141,7 +141,10 @@ public class ServerEventListener implements Listener {
 			if(s != null) {
 				Shop.stopShopSession(p);
 				SoundUtilities.playSoundTo("GLASS", PlayerUtilities.get(s.playerName));
-				ChatUtilities.logTo(p, ChatColor.GOLD + "To prevent from an undesirable or unintended occurance during routine TeknetCore maintenance, your shop session has been safely ended. Please wait about 10 (s) and try again.", ChatUtilities.LogType.NOTICE);
+				ChatUtilities.logTo(p, ChatColor.GOLD + "To prevent from an undesirable or "
+						+ "unintended occurance during routine TeknetCore maintenance, your "
+						+ "shop session has been safely ended. Please wait about 10 (s) and try again.", 
+						ChatUtilities.LogType.NOTICE);
 			}
 		}
 	}

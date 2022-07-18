@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
 import io.github.iwilkey.teknetcore.economy.Bank;
 import io.github.iwilkey.teknetcore.economy.Shop;
+import io.github.iwilkey.teknetcore.estate.Estate;
 import io.github.iwilkey.teknetcore.eventlistener.ServerEventListener;
 import io.github.iwilkey.teknetcore.location.Locations;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
@@ -28,15 +29,12 @@ public final class TeknetCore extends JavaPlugin {
         loadResources();
         registerCommands();
         clock();
-		getLogger().info(
-			  "\n\n  1234567   _               _    _____               \n"
-				+ " 289   34! 1 1             1 !  / ____!              \n"
-				+ "    | | ___| | ___ __   ___| |_1 |     ___  _ __ ___ \n"
-				+ "    | |/ _ \\ |/ / '_ \\ / _ \\ __| |    / _ \\| '__/ _ \\\n"
-				+ "    | |  __/   22 2 | 2  __/ |_| |___| (_) 2 | 1  __/\n"
-				+ "    2_|\\___|_|\\_\\_| |_|\\___1\\__|\\_____\\___/|_t  \\___|\n"
-				+ "                                                     \n\n"
-				+ "                                                     ");
+		getLogger().info("\n _____     _               _     ___               \n"
+					   + "/__   \\___| | ___ __   ___| |_  / __\\___  _ __ ___ \n"
+				       + "  / /\\/ _ \\ |/ / '_ \\ / _ \\ __|/ /  / _ \\| '__/ _ \\\n"
+				       + " / / |  __/   <| | | |  __/ |_/ /__| (_) | | |  __/\n"
+				       + " \\/   \\___|_|\\_\\_| |_|\\___|\\__\\____/\\___/|_|  \\___|\n"
+				       + "                                                   ");
 	}
 	
 	@Override
@@ -55,6 +53,7 @@ public final class TeknetCore extends JavaPlugin {
         new Locations();
         new Bank();
         new Shop();
+        new Estate();
 	}
 	
 	private void registerCommands() {
@@ -70,6 +69,9 @@ public final class TeknetCore extends JavaPlugin {
 		// Economy
 		getCommand("bank").setExecutor(new Bank.BankCommand(Rank.HOBBYIST));
 		getCommand("shop").setExecutor(new Shop.ShopCommand(Rank.HOBBYIST));
+		
+		// Estate
+		getCommand("estate").setExecutor(new Estate.EstateCommand(Rank.HOBBYIST));
 		
 		// Admin utilities
 		getCommand("ranks").setExecutor(new Ranks.AdminRankUtilities(Rank.ADMIN));
@@ -100,10 +102,14 @@ public final class TeknetCore extends JavaPlugin {
 	private static void initDocumentation() {
 		int page = 0;
 		doc = new CommandDocumentation("TeknetCore");
-		doc.editPage(page).write(ChatColor.GOLD + "TeknetCore is a custom Java plugin designed and programmed" + ChatColor.RESET, 3);
-		doc.editPage(page).write(ChatColor.GOLD + "    by Ian Wilkey (yoimian) Ⓒ 2022" + ChatColor.RESET, 4);
-		doc.editPage(page).write("    Version: " + ChatColor.AQUA + "1.100.D (Development)" + ChatColor.RESET, 5);
-		doc.editPage(page).write(ChatColor.GRAY + "------- Press 't' and scroll up -------" + ChatColor.RESET, 8);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 1);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 2);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 3);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 4);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 5);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 6);
+		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 7);
+		doc.editPage(0).write(ChatColor.GRAY + "------- Press 't' and scroll up -------" + ChatColor.RESET, 8);
 		doc.addPage(new Page());
 		page = 1;
 		doc.editPage(page).write(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "  Server Utilities", 0);
@@ -125,6 +131,16 @@ public final class TeknetCore extends JavaPlugin {
 		doc.editPage(page).write("► [position] (command) (argument(s)) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 5);
 		doc.editPage(page).write(ChatColor.GOLD + "  Save and teleport to custom locations.", 6);
 		doc.editPage(page).write(ChatColor.GOLD + "    Start with [position-help]", 7);
+		doc.editPage(page).write("", 8);
+		page = 3;
+		doc.editPage(page).write(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "  Location Utilities", 0);
+		doc.editPage(page).write("► [bank] (command) (argument(s)) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 1);
+		doc.editPage(page).write(ChatColor.GOLD + "  Manage your TeknetTrust bank account. [home-help]", 2);
+		doc.editPage(page).write(ChatColor.GOLD + "    Start with [bank-help]", 3);
+		doc.editPage(page).write("", 4);
+		doc.editPage(page).write("", 5);
+		doc.editPage(page).write("", 6);
+		doc.editPage(page).write("", 7);
 		doc.editPage(page).write("", 8);
 		
 		// doc.editPage(1).write(ChatColor.GRAY + "------- End of TeknetCore manual. -------" + ChatColor.RESET, 8);

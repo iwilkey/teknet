@@ -17,9 +17,12 @@ import io.github.iwilkey.teknetcore.utils.FileUtilities;
 import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.MathUtilities;
+import io.github.iwilkey.teknetcore.utils.PlayerUtilities;
 import io.github.iwilkey.teknetcore.utils.SequenceUtilities;
 import io.github.iwilkey.teknetcore.utils.SequenceUtilities.Sequence;
 import io.github.iwilkey.teknetcore.utils.SequenceUtilities.SequenceFunction;
+
+import java.awt.Rectangle;
 
 public class Estate {
 	
@@ -30,10 +33,7 @@ public class Estate {
 			Function estateCreate = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
-					if(!createEstateInstance(sender, args[1])) {
-						ChatUtilities.logTo(sender, "You already have an estate by this name!", ChatUtilities.LogType.FATAL);
-						return;
-					}
+					if(!createEstateInstance(sender, args[1])) return;
 					ChatUtilities.logTo(sender, "Estate created. Use [estate-manage-" + args[1] + "] to proceed!", 
 							ChatUtilities.LogType.SUCCESS);
 				}	
@@ -59,16 +59,73 @@ public class Estate {
 					} else {
 						switch(args[2]) {
 							case "resize":
-								ChatUtilities.logTo(sender, "This function is not currently implemented.", ChatUtilities.LogType.NOTICE);
+								if(args.length != 4) {
+									ChatUtilities.logTo(sender, "Incorrect estate resize argument(s). Remember, it's: [estate-manage-" + s.estateName + "-resize-<number>]", ChatUtilities.LogType.FATAL);
+									return;
+								} 
+								int size;
+								try {
+									size = Integer.parseInt(args[3]);
+								} catch(Exception e) {
+									ChatUtilities.logTo(sender, "You must supply a valid number! Remember, it's: [estate-manage-" + s.estateName + "-resize-<number>]", ChatUtilities.LogType.FATAL);
+									return;
+								}
+								if(size < 2) {
+									ChatUtilities.logTo(sender, "You must supply a number greater than or equal to 2.", ChatUtilities.LogType.FATAL);
+									return;
+								}
+								if(!proposedEstateOverlap(s.estateName, s.centerLocation, size)) {
+									ChatUtilities.logTo(sender, "You cannot resize this property to that "
+											+ "value because the resulting area will overlap with an existing estate.", ChatUtilities.LogType.FATAL);
+									return;
+								}
+								s.size = size;
+								writeRegister();
+								showEstateTo(s, sender);
+								ChatUtilities.logTo(sender, "Region resized. You now owe\n" + s.rent.printValueColored() + " per day.", ChatUtilities.LogType.SUCCESS);
 								break;
 							case "trust":
-								ChatUtilities.logTo(sender, "This function is not currently implemented.", ChatUtilities.LogType.NOTICE);
+								if(args.length != 4) {
+									ChatUtilities.logTo(sender, "Incorrect estate trust argument(s). Remember, it's: [estate-manage-" + s.estateName + "-trust-<player-name>]", ChatUtilities.LogType.FATAL);
+									return;
+								}
+								for(String name : s.members)
+									if(name.equals(args[3])) {
+										ChatUtilities.logTo(sender, "You already trust this player to interact in this region. "
+												+ "If you changed your mind, use [estate-manage-" + s.estateName + 
+												"-untrust-" + args[3] + "]", ChatUtilities.LogType.NOTICE);
+										return;
+									}
+								s.members.add(args[3]);
+								ChatUtilities.logTo(sender, ChatColor.DARK_GREEN + "You now trust player " + ChatColor.GOLD + args[3] + ChatColor.DARK_GREEN + " to place, destroy, and interact with blocks in this region!", ChatUtilities.LogType.SUCCESS);
+								writeRegister();
+								Player p = PlayerUtilities.get(args[3]);
+								if(p != null) {
+									ChatUtilities.logTo(sender, "The " + ChatColor.DARK_GREEN + s.estateName + ChatColor.WHITE + " "
+											+ "Teknet Estate owner now trusts you to place, destroy, and "
+											+ "interact with blocks in the region.", ChatUtilities.LogType.NOTICE);
+								}
 								break;
 							case "untrust":
-								ChatUtilities.logTo(sender, "This function is not currently implemented.", ChatUtilities.LogType.NOTICE);
+								if(args.length != 4) {
+									ChatUtilities.logTo(sender, "Incorrect estate untrust argument(s). Remember, it's: [estate-manage-" + s.estateName + "-untrust-<player-name>]", ChatUtilities.LogType.FATAL);
+									return;
+								}
+								boolean found = false;
+								for(String name : s.members)
+									if(name.equals(args[3]))
+										found = true;
+								if(!found) {
+									ChatUtilities.logTo(sender, "You already do not trust anyone by the name " + ChatColor.GOLD + args[3] + ChatColor.GRAY + " in this region.", ChatUtilities.LogType.NOTICE);
+									return;
+								}
+								s.members.remove(args[3]);
+								writeRegister();
+								ChatUtilities.logTo(sender, ChatColor.RED + "You now DO NOT trust player\n" + ChatColor.GOLD + args[3] + ChatColor.RED + " to place, "
+										+ "destroy, and interact with blocks in this region!", ChatUtilities.LogType.SUCCESS);
 								break;
 							default:
-								ChatUtilities.logTo(sender, "Not a valid estate property! [estate-manage-" + s.estateName + "]", ChatUtilities.LogType.FATAL);
+								ChatUtilities.logTo(sender, "Not a valid estate property! Use [estate-manage-" + s.estateName + "] for help.", ChatUtilities.LogType.FATAL);
 								return;
 						}
 					}
@@ -78,7 +135,16 @@ public class Estate {
 			Function estateDelete = new Function() {
 				@Override
 				public void func(Player sender, String[] args) {
-					ChatUtilities.logTo(sender, "This function is not currently implemented.", ChatUtilities.LogType.NOTICE);
+					EstateInstance s = getEstateInstance(sender, args[1]);
+					if(s == null) {
+						ChatUtilities.logTo(sender, "You cannot delete this estate because "
+								+ "either it doesn't exist or you do not own it.", ChatUtilities.LogType.FATAL);
+						return;
+					}
+					Estate.ESTATE_STATE.remove(s);
+					writeRegister();
+					ChatUtilities.logTo(sender, "Estate " + ChatColor.GOLD +  args[1] + ChatColor.GRAY + " removed.", ChatUtilities.LogType.SUCCESS);
+					return;
 				}
 			};
 			
@@ -175,15 +241,15 @@ public class Estate {
 				if(MathUtilities.locationInEstateRegion(e.centerLocation.getBlockX(), e.centerLocation.getBlockZ(), x, z, e.size)) {
 					if(!e.inRegion(p)) {
 						ChatUtilities.logTo(p, ChatColor.GREEN + 
-								"You have just entered the Teknet Estate \"" + ChatColor.GOLD 
-								+ e.estateName.toUpperCase() + ChatColor.GREEN + "\" owned by " + ChatColor.GOLD + e.owner + ChatColor.GREEN + "! Use [estate-current] " + ChatColor.GREEN + "to see it's information.", ChatUtilities.LogType.NOTICE);
+								"You have just entered the Teknet Estate \"" + ChatColor.DARK_GREEN 
+								+ e.estateName.toUpperCase() + ChatColor.GREEN + "\" owned by " + ChatColor.DARK_GREEN + e.owner + ChatColor.GREEN + "! Use [estate-current] " + ChatColor.GREEN + "to see it's information.", ChatUtilities.LogType.NOTICE);
 						e.visitors.add(p.getName());
 					}
 				} else {
 					if(e.inRegion(p)) {
 						ChatUtilities.logTo(p, ChatColor.GRAY + 
-								"You have just left the Teknet Estate \"" + ChatColor.GOLD 
-								+ e.estateName.toUpperCase() + ChatColor.GRAY + "\" owned by " + ChatColor.GOLD + e.owner + ChatColor.GRAY + "!", ChatUtilities.LogType.NOTICE);
+								"You have just left the Teknet Estate \"" + ChatColor.WHITE 
+								+ e.estateName.toUpperCase() + ChatColor.GRAY + "\" owned by " + ChatColor.WHITE + e.owner + ChatColor.GRAY + "!", ChatUtilities.LogType.NOTICE);
 						e.visitors.remove(p.getName());
 					}
 				}
@@ -207,7 +273,7 @@ public class Estate {
 		ChatUtilities.messageTo(sender, "------- Teknet Estates Listing -------", ChatColor.WHITE);
 		ChatUtilities.messageTo(sender, " ► Estate name: " + ChatColor.GOLD + s.estateName.toUpperCase(), ChatColor.GRAY);
 		ChatUtilities.messageTo(sender, " ► Estate owner: " + ChatColor.GOLD + s.owner, ChatColor.GRAY);
-		ChatUtilities.messageTo(sender, " ► Estate size: " + ChatColor.GOLD + ((s.size * 2) + 1) + " x " + ((s.size * 2) + 1) + ChatColor.GRAY + " (Center: " + (s.size + 1) + ", " + (s.size + 1) + ")", ChatColor.GRAY);
+		ChatUtilities.messageTo(sender, " ► Estate size: " + ChatColor.GOLD + s.size + ChatColor.GRAY + " [" + ChatColor.YELLOW + ((s.size * 2) + 1) + " x " + ((s.size * 2) + 1) + ChatColor.GRAY + " (Center: " + (s.size + 1) + ", " + (s.size + 1) + ")]", ChatColor.GRAY);
 		ChatUtilities.messageTo(sender, " ► Estate location (center): " + ChatColor.GOLD 
 				+ "x: " + s.centerLocation.getBlockX() + ", z: " + s.centerLocation.getBlockZ() 
 				+ ChatColor.GRAY + "\n    (Your location): " + ChatColor.YELLOW + "x: " + sender.getLocation().getBlockX() + ", z: " +
@@ -228,17 +294,35 @@ public class Estate {
 		SequenceFunction f = new SequenceFunction() {
 			@Override
 			public void onIteration(Object... objects) {
-				for(long xx = -inst.size; xx <= inst.size; xx++) {
-					for(long zz = -inst.size; zz <= inst.size; zz++) {
-						Location l = new Location(inst.centerLocation.getWorld(), 
-								inst.centerLocation.getX() + xx, player.getLocation().getY() - 1, 
-								inst.centerLocation.getZ() + zz);
-						player.playEffect(l, Effect.MOBSPAWNER_FLAMES, null);
-					}
+				for(long dir = -inst.size; dir <= inst.size; dir++) {
+					Location lx = new Location(inst.centerLocation.getWorld(), 
+							inst.centerLocation.getBlockX() + dir, player.getLocation().getBlockY() - 1, 
+							inst.centerLocation.getBlockZ());
+					Location lz = new Location(inst.centerLocation.getWorld(), 
+							inst.centerLocation.getBlockX(), player.getLocation().getBlockY() - 1, 
+							inst.centerLocation.getBlockZ() + dir);
+					Location nxlb = new Location(inst.centerLocation.getWorld(), 
+							inst.centerLocation.getBlockX() - dir, player.getLocation().getBlockY() - 1, 
+							inst.centerLocation.getBlockZ() + dir);
+					Location nzlb = new Location(inst.centerLocation.getWorld(), 
+							inst.centerLocation.getBlockX() + dir, player.getLocation().getBlockY() - 1, 
+							inst.centerLocation.getBlockZ() - dir);
+					Location pblb = new Location(inst.centerLocation.getWorld(), 
+							inst.centerLocation.getBlockX() + dir, player.getLocation().getBlockY() - 1, 
+							inst.centerLocation.getBlockZ() + dir);
+					Location nblb = new Location(inst.centerLocation.getWorld(), 
+							inst.centerLocation.getBlockX() - dir, player.getLocation().getBlockY() - 1, 
+							inst.centerLocation.getBlockZ() - dir);
+					player.playEffect(lx, Effect.MOBSPAWNER_FLAMES, null);
+					player.playEffect(lz, Effect.MOBSPAWNER_FLAMES, null);
+					player.playEffect(nxlb, Effect.MOBSPAWNER_FLAMES, null);
+					player.playEffect(nzlb, Effect.MOBSPAWNER_FLAMES, null);
+					player.playEffect(pblb, Effect.MOBSPAWNER_FLAMES, null);
+					player.playEffect(nblb, Effect.MOBSPAWNER_FLAMES, null);
 				}
 			}
 		};
-		Sequence show = new Sequence(25, 0.5f, f);
+		Sequence show = new Sequence(10, 0.5f, f); // Show the region for thirty seconds.
 		SequenceUtilities.startSequence(show);
 	}
 	
@@ -249,11 +333,32 @@ public class Estate {
 		return null;
 	}
 	
+	public static boolean proposedEstateOverlap(String name, Location center, long size) {
+		Rectangle proposed = new Rectangle((int)(center.getBlockX() - size), 
+				(int)(center.getBlockZ() - size), (int)(size * 2) + 1, (int)(size * 2) + 1);
+		for(EstateInstance e : ESTATE_STATE) {
+			if(e.estateName.equals(name)) continue;
+			Rectangle check = new Rectangle((int)(e.centerLocation.getBlockX() - e.size), 
+					(int)(e.centerLocation.getBlockZ() - e.size), (int)(e.size * 2) + 1, (int)(e.size * 2) + 1);
+			if(check.intersects(proposed)) return false;
+		}
+		return true;
+	}
+	
 	public static boolean createEstateInstance(Player player, String name) {
 		for(EstateInstance e : ESTATE_STATE)
-			if(e.estateName.equals(name) && e.owner.equals(player.getName()))
+			if(e.estateName.equals(name)) {
+				ChatUtilities.logTo(player, "There is already an estate registered by this name! Choose another.", 
+						ChatUtilities.LogType.FATAL);
 				return false;
+			}
 		// Check overlap.
+		if(!proposedEstateOverlap("", player.getLocation(), 3)) {
+			ChatUtilities.logTo(player, "You cannot create an estate here because it "
+					+ "would overlap with an existing estate. Try somewhere else.", 
+					ChatUtilities.LogType.FATAL);
+			return false;
+		}
 		ESTATE_STATE.add(new EstateInstance(player, name));
 		writeRegister();
 		return true;

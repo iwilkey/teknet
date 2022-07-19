@@ -51,7 +51,6 @@ public class ServerEventListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGH)
 	public static void onPlayerCommandRequest(PlayerCommandPreprocessEvent e) {
 		if(e.getMessage().substring(0, 5).equals("/stop")) return;
-		e.setMessage(e.getMessage().toLowerCase());
 		if(e.getMessage().equals("/help") || e.getMessage().equals("/teknetcore help")) {
 			TeknetCore.printAllHelp(e.getPlayer());
 			e.setCancelled(true);

@@ -475,10 +475,6 @@ public class Shop {
 		SHOP_SESSION_STATE = new ArrayList<>();
 	}
 	
-	public static void tick() {
-		
-	}
-	
 	public static boolean startShopSession(Player player) {
 		ShopBuySession s = getShopSessionOf(player);
 		if(s != null) {

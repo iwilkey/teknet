@@ -96,7 +96,6 @@ public final class TeknetCore extends JavaPlugin {
 					}
 					Cooldown.tick();
 					Locations.tick();
-					Shop.tick();
 					Estate.tick();
 					SequenceUtilities.tick();
 				}

@@ -25,7 +25,7 @@ public abstract class TeknetCoreCommand implements CommandExecutor {
 		NO_ARGUMENTS,
 		NO_SUCH_COMMAND
 	}
-	protected static interface Function {
+	public static interface Function {
 		public void func(Player sender, String[] args);
 	}
 	protected static class CommandFunction {

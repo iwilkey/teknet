@@ -14,6 +14,7 @@ import io.github.iwilkey.teknetcore.location.Locations;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
 import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
 import io.github.iwilkey.teknetcore.utils.PlayerServerUtilities;
+import io.github.iwilkey.teknetcore.utils.SequenceUtilities;
 import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities.CommandDocumentation.Page;
@@ -54,6 +55,7 @@ public final class TeknetCore extends JavaPlugin {
         new Bank();
         new Shop();
         new Estate();
+        new SequenceUtilities();
 	}
 	
 	private void registerCommands() {
@@ -95,6 +97,8 @@ public final class TeknetCore extends JavaPlugin {
 					Cooldown.tick();
 					Locations.tick();
 					Shop.tick();
+					Estate.tick();
+					SequenceUtilities.tick();
 				}
 			}, 0l, 1l);
 	}
@@ -102,14 +106,15 @@ public final class TeknetCore extends JavaPlugin {
 	private static void initDocumentation() {
 		int page = 0;
 		doc = new CommandDocumentation("TeknetCore");
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 1);
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 2);
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 3);
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 4);
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 5);
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 6);
-		doc.editPage(0).write(ChatColor.GRAY + "" + ChatColor.RESET, 7);
-		doc.editPage(0).write(ChatColor.GRAY + "------- Press 't' and scroll up -------" + ChatColor.RESET, 8);
+		doc.editPage(0).write(ChatColor.GRAY + "Use [help-n] " + ChatColor.GRAY + "to see page 'n' of TeknetCore help." + ChatColor.RESET, 0);
+		doc.editPage(0).write(ChatColor.GOLD + "TeknetCore © 2022 Ian Wilkey (iwilkey)" + ChatColor.RESET, 1);
+		doc.editPage(0).write(ChatColor.GRAY + "TeknetCore is a Java Plugin designed by American" + ChatColor.RESET, 2);
+		doc.editPage(0).write(ChatColor.GRAY + "software engineer Ian Wilkey. It is a suite of tools" + ChatColor.RESET, 3);
+		doc.editPage(0).write(ChatColor.GRAY + "intended to enhance the experiance of the Teknet Server" + ChatColor.RESET, 4);
+		doc.editPage(0).write(ChatColor.GRAY + "Network members and staff." + ChatColor.RESET, 5);
+		doc.editPage(0).write(ChatColor.DARK_AQUA + "Please use this manual to get started with its usage!" + ChatColor.RESET, 6);
+		doc.editPage(0).write(ChatColor.RED + "If you encounter a bug, please alert an admin right away." + ChatColor.RESET, 7);
+		doc.editPage(0).write(ChatColor.GRAY + "------- Commands on following pages... -------" + ChatColor.RESET, 8);
 		doc.addPage(new Page());
 		page = 1;
 		doc.editPage(page).write(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "  Server Utilities", 0);
@@ -120,7 +125,7 @@ public final class TeknetCore extends JavaPlugin {
 		doc.editPage(page).write("", 5);
 		doc.editPage(page).write("", 6);
 		doc.editPage(page).write("", 7);
-		doc.editPage(page).write("", 8);
+		doc.editPage(page).write(ChatColor.GRAY + "------- Commands on following pages... -------" + ChatColor.RESET, 8);
 		doc.addPage(new Page());
 		page = 2;
 		doc.editPage(page).write(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "  Location Utilities", 0);
@@ -129,19 +134,31 @@ public final class TeknetCore extends JavaPlugin {
 		doc.editPage(page).write("► [sethome] (no arguments) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 3);
 		doc.editPage(page).write(ChatColor.GOLD + "  Set your location as your home. [sethome-help]", 4);
 		doc.editPage(page).write("► [position] (command) (argument(s)) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 5);
-		doc.editPage(page).write(ChatColor.GOLD + "  Save and teleport to custom locations.", 6);
+		doc.editPage(page).write(ChatColor.GOLD + "  Teleport to personally saved (or random) locations.", 6);
 		doc.editPage(page).write(ChatColor.GOLD + "    Start with [position-help]", 7);
-		doc.editPage(page).write("", 8);
+		doc.editPage(page).write(ChatColor.GRAY + "------- Commands on following pages... -------" + ChatColor.RESET, 8);
+		doc.addPage(new Page());
 		page = 3;
-		doc.editPage(page).write(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "  Location Utilities", 0);
+		doc.editPage(page).write(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "  Economic Utilities", 0);
 		doc.editPage(page).write("► [bank] (command) (argument(s)) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 1);
-		doc.editPage(page).write(ChatColor.GOLD + "  Manage your TeknetTrust bank account. [home-help]", 2);
+		doc.editPage(page).write(ChatColor.GOLD + "  Manage your TeknetTrust bank account.", 2);
 		doc.editPage(page).write(ChatColor.GOLD + "    Start with [bank-help]", 3);
+		doc.editPage(page).write("► [shop] (command) (argument(s)) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 4);
+		doc.editPage(page).write(ChatColor.GOLD + "  Buy and sell all items available in Tekkit Legends.", 5);
+		doc.editPage(page).write(ChatColor.GOLD + "    Start with [shop-help]", 6);
+		doc.editPage(page).write("", 7);
+		doc.editPage(page).write(ChatColor.GRAY + "------- Commands on following pages... -------" + ChatColor.RESET, 8);
+		doc.addPage(new Page());
+		page = 4;
+		doc.editPage(page).write(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "  Estate Utilities", 0);
+		doc.editPage(page).write("► [estate] (command) (argument(s)) " + Ranks.introduce(Ranks.getRankFromLevel(1)) + ChatColor.RESET, 1);
+		doc.editPage(page).write(ChatColor.GOLD + "  Manage your server estates! (Land protection).", 2);
+		doc.editPage(page).write(ChatColor.GOLD + "    Start with [estate-help]", 3);
 		doc.editPage(page).write("", 4);
 		doc.editPage(page).write("", 5);
 		doc.editPage(page).write("", 6);
 		doc.editPage(page).write("", 7);
-		doc.editPage(page).write("", 8);
+		doc.editPage(page).write(ChatColor.GRAY + "------- Commands on following pages... -------" + ChatColor.RESET, 8);
 		
 		// doc.editPage(1).write(ChatColor.GRAY + "------- End of TeknetCore manual. -------" + ChatColor.RESET, 8);
 	}

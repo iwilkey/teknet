@@ -2,6 +2,7 @@ package io.github.iwilkey.teknetcore.eventlistener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,9 +22,12 @@ import io.github.iwilkey.teknetcore.TeknetCore;
 import io.github.iwilkey.teknetcore.cooldown.Cooldown;
 import io.github.iwilkey.teknetcore.economy.Shop;
 import io.github.iwilkey.teknetcore.economy.Shop.ShopBuySession;
+import io.github.iwilkey.teknetcore.estate.Estate;
+import io.github.iwilkey.teknetcore.estate.Estate.EstateInstance;
 import io.github.iwilkey.teknetcore.ranks.Ranks;
 import io.github.iwilkey.teknetcore.ranks.Ranks.Rank;
 import io.github.iwilkey.teknetcore.utils.ChatUtilities;
+import io.github.iwilkey.teknetcore.utils.MathUtilities;
 import io.github.iwilkey.teknetcore.utils.PlayerUtilities;
 import io.github.iwilkey.teknetcore.utils.SoundUtilities;
 
@@ -98,6 +102,18 @@ public class ServerEventListener implements Listener {
 			ChatUtilities.messageTo(e.getPlayer(), "Done shopping? [shop-checkout]", 
 					ChatColor.GRAY);
 			e.setCancelled(true);
+		}
+		Location interactionLocation = e.getClickedBlock().getLocation();
+		for(EstateInstance ss : Estate.ESTATE_STATE) {
+			if(MathUtilities.locationInEstateRegion(ss.centerLocation.getBlockX(), ss.centerLocation.getBlockZ(), interactionLocation.getBlockX(), interactionLocation.getBlockZ(), ss.size)) {
+				if(!ss.members.contains(e.getPlayer().getName())) {
+					SoundUtilities.playSoundTo("NOTE_BASS", e.getPlayer());
+					ChatUtilities.messageTo(e.getPlayer(), "You do not have permission to interact "
+							+ "with anything inside this estate!", 
+							ChatColor.RED);
+					e.setCancelled(true);
+				}
+			}
 		}
 	}
 	

@@ -29,7 +29,5 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Users/ianwilkey/Desktop/ProjectE-1.7.10-PE1.9.3h.jar"/>
-	<classpathentry kind="lib" path="/Users/ianwilkey/Desktop/craftbukkit-1.7.10-R0.1-20140808.005431-8.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

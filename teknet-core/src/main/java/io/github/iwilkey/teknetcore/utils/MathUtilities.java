@@ -11,4 +11,7 @@ public class MathUtilities {
 		Random r = new Random();
 		return low + r.nextDouble() * (high - low);
 	}
+	public static boolean locationInEstateRegion(long ex, long ez, long px, long pz, float size) {
+		return (px >= ex - size && px <= ex + size) && (pz >= ez - size && pz <= ez + size);
+	}
 }

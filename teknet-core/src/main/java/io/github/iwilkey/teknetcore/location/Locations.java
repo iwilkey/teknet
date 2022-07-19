@@ -289,7 +289,8 @@ public class Locations {
 					    int y = 156;
 					    int z = MathUtilities.randomIntBetween(sender.getLocation().getBlockZ() - RANGE, 
 					    		sender.getLocation().getBlockZ() + RANGE);
-					    if(sender.getWorld().getBlockAt(x, y, z).isEmpty()) {
+					    if(sender.getWorld().getBlockAt(x, y, z).isEmpty() 
+					    		&& !sender.getWorld().getBlockAt((int)x, (int)y, (int)z).isLiquid()) {
 							while(sender.getWorld().getBlockAt(x, y - 1, z).isEmpty() && y > 0) y--;
 							Location lpp = sender.getLocation();
 							lpp.setX(x);
